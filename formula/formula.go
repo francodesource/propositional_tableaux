@@ -189,3 +189,11 @@ func IsLiteral(formula Formula) bool {
 
 	return false
 }
+
+func Complement(formula Formula) Formula {
+	if not, ok := formula.(Not); ok {
+		return not.Negated()
+	} else {
+		return NewNot(formula)
+	}
+}

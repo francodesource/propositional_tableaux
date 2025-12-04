@@ -288,3 +288,40 @@ func TestIsLiteral(t *testing.T) {
 		})
 	}
 }
+
+func TestComplement(t *testing.T) {
+	tests := []struct {
+		name    string
+		formula Formula
+		want    Formula
+	}{
+		{
+			"letter",
+			letters.p,
+			NewNot(letters.p),
+		},
+		{
+			"literal",
+			NewNot(letters.p),
+			letters.p,
+		},
+		{
+			"binary formula",
+			NewNor(letters.p, NewNot(letters.q)),
+			NewNot(NewNor(letters.p, NewNot(letters.q))),
+		},
+		{
+			"binary formula negated",
+			NewNot(NewAnd(letters.p, letters.q)),
+			NewAnd(letters.p, letters.q),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if complement := Complement(tt.formula); complement != tt.want {
+				t.Errorf("got %v, want %v", complement, tt.want)
+			}
+		})
+	}
+}
