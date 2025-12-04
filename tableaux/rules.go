@@ -26,7 +26,7 @@ var rules = map[RulePair]Rule{
 
 // ApplyRule apply the correct tableaux-building rule and returns the resulting two formulas.
 // The second formula can be nil for the double negation case, that returns only a single formula.
-// Panics if the type is not formula.Not or formula.Binary or if the formula is a Literal.
+// Panics if the type is not formula.Not or formula.Binary or if the formula is a LiteralClass.
 func ApplyRule(f formula.Formula) (formula.Formula, formula.Formula) {
 	switch f := f.(type) {
 	case formula.Not:

@@ -148,7 +148,7 @@ func buildSemanticTableaux(node *Node) {
 	// If it reaches here U(l) contains non-literals
 	for f := range node.formulas.Iter() {
 		switch f.Class() {
-		case formula.Literal:
+		case formula.LiteralClass:
 			continue
 		case formula.Alpha:
 			left, right := ApplyRule(f)

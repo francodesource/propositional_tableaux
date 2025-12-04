@@ -136,12 +136,12 @@ func TestFormula_Class(t *testing.T) {
 		{
 			name:     "letter",
 			formula:  letters.p,
-			expected: Literal,
+			expected: LiteralClass,
 		},
 		{
 			name:     "literal",
 			formula:  NewNot(letters.p),
-			expected: Literal,
+			expected: LiteralClass,
 		},
 		// Alpha-formulas
 		{
@@ -321,6 +321,60 @@ func TestComplement(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if complement := Complement(tt.formula); complement != tt.want {
 				t.Errorf("got %v, want %v", complement, tt.want)
+			}
+		})
+	}
+}
+
+func TestAsLiteral(t *testing.T) {
+	tests := []struct {
+		name    string
+		formula Formula
+		want    Literal
+		error   bool
+	}{
+		{
+			"letter",
+			letters.p,
+			Literal{Name: "p", Neg: false},
+			false,
+		},
+		{
+			"literal",
+			NewNot(letters.q),
+			Literal{Name: "q", Neg: true},
+			false,
+		},
+		{
+			"binary formula",
+			NewNor(letters.p, letters.q),
+			Literal{},
+			true,
+		},
+		{
+			"negated formula",
+			NewNot(NewNot(letters.q)),
+			Literal{},
+			true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			defer func() {
+				if r := recover(); r != nil {
+					if !tt.error {
+						t.Errorf("AsLiteral(%v) panicked unexpectedly", tt.formula)
+					}
+				} else {
+					if tt.error {
+						t.Errorf("AsLiteral(%v) did not panic as expected", tt.formula)
+					}
+				}
+			}()
+
+			lit := AsLiteral(tt.formula)
+			if lit != tt.want {
+				t.Errorf("got %v, want %v", lit, tt.want)
 			}
 		})
 	}

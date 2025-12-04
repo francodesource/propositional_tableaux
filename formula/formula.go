@@ -5,15 +5,15 @@ import "fmt"
 type Classification int
 
 const (
-	Alpha                  = -1
-	Literal Classification = 0
-	Beta                   = 1
+	Alpha                       = -1
+	LiteralClass Classification = 0
+	Beta                        = 1
 )
 
 func (c Classification) String() string {
 	switch c {
-	case Literal:
-		return "Literal"
+	case LiteralClass:
+		return "LiteralClass"
 	case Alpha:
 		return "Alpha"
 	case Beta:
@@ -41,7 +41,7 @@ func (l Letter) Name() string {
 }
 
 func (l Letter) Class() Classification {
-	return Literal
+	return LiteralClass
 }
 
 func (l Letter) String() string {
@@ -63,7 +63,7 @@ func (n Not) Negated() Formula {
 func (n Not) Class() Classification {
 	switch inner := n.negated.(type) {
 	case Letter:
-		return Literal
+		return LiteralClass
 	case Not:
 		return Alpha
 	case Binary:
@@ -188,6 +188,34 @@ func IsLiteral(formula Formula) bool {
 	}
 
 	return false
+}
+
+// Literal is either a letter or its negation
+type Literal struct {
+	Name string
+	Neg  bool
+}
+
+// AsLiteral converts a Formula to a Literal. It panics if the formula is not a literal.
+// It should be used only after checking with IsLiteral.
+func AsLiteral(formula Formula) Literal {
+	if letter, ok := formula.(Letter); ok {
+		return Literal{
+			Name: letter.Name(),
+			Neg:  false,
+		}
+	}
+
+	if not, ok := formula.(Not); ok {
+		if letter, ok := not.Negated().(Letter); ok {
+			return Literal{
+				Name: letter.Name(),
+				Neg:  true,
+			}
+		}
+	}
+
+	panic(fmt.Errorf("%v is not a literal", formula))
 }
 
 func Complement(formula Formula) Formula {
