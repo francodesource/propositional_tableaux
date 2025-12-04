@@ -73,12 +73,16 @@ func (node *Node) IsLeaf() bool {
 	return node.left == nil && node.right == nil
 }
 
-func eval(node *Node) []map[string]bool {
+// Assignment represents a truth assignment for propositional letters. If a propositional letter is missing,
+// it can be assigned either true or false, as it does not affect the evaluation of the formulas.
+type Assignment map[string]bool
+
+func eval(node *Node) []Assignment {
 	if node.IsLeaf() {
 		if node.mark == Closed {
-			return []map[string]bool{}
+			return []Assignment{}
 		}
-		assignment := make(map[string]bool)
+		assignment := make(Assignment)
 
 		if node.mark == Open {
 			for literal := range node.formulas.Iter() {
@@ -95,11 +99,11 @@ func eval(node *Node) []map[string]bool {
 					panic("malformed tableaux")
 				}
 			}
-			return []map[string]bool{assignment}
+			return []Assignment{assignment}
 		}
 	}
 
-	var res []map[string]bool
+	var res []Assignment
 	if node.left != nil {
 		res = eval(node.left)
 	}
@@ -110,7 +114,7 @@ func eval(node *Node) []map[string]bool {
 	return res
 }
 
-func (node *Node) Eval() []map[string]bool {
+func (node *Node) Eval() []Assignment {
 	return eval(node)
 }
 

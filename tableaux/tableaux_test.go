@@ -29,17 +29,17 @@ func TestBuildSemanticTableaux(t *testing.T) {
 	tests := []struct {
 		name string
 		f    formula.Formula
-		want []map[string]bool
+		want []Assignment
 	}{
 		{
 			"simple unsat",
 			simpleUnsat,
-			[]map[string]bool{},
+			[]Assignment{},
 		},
 		{
 			"simple tautology",
 			simpleTaut,
-			[]map[string]bool{
+			[]Assignment{
 				{"P": true},
 				{"P": false},
 			},
@@ -47,7 +47,7 @@ func TestBuildSemanticTableaux(t *testing.T) {
 		{
 			"unsat",
 			unsat,
-			[]map[string]bool{},
+			[]Assignment{},
 		},
 	}
 
