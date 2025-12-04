@@ -86,17 +86,13 @@ func eval(node *Node) []Assignment {
 
 		if node.mark == Open {
 			for literal := range node.formulas.Iter() {
-				switch literal := literal.(type) {
-				case formula.Letter:
-					assignment[literal.Name()] = true
-				case formula.Not:
-					letter, ok := literal.Negated().(formula.Letter)
-					if !ok {
-						panic("malformed tableaux")
-					}
-					assignment[letter.Name()] = false
-				default:
-					panic("malformed tableaux")
+				// here I use AsLiteral because if the construction is correct all formulas in an open leaf are literals
+				// if not, it is a bug in the construction so it is correct to panic.
+				literal := formula.AsLiteral(literal)
+				if literal.Neg {
+					assignment[literal.Name] = false
+				} else {
+					assignment[literal.Name] = true
 				}
 			}
 			return []Assignment{assignment}
