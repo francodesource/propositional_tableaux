@@ -243,3 +243,11 @@ func TestBinary_Getters(t *testing.T) {
 		t.Errorf("expected right = %v, got %v", letters.q, and.Right())
 	}
 }
+
+func TestNot_Negated(t *testing.T) {
+	neg := NewNot(letters.p)
+
+	if neg.Negated() != letters.p {
+		t.Errorf("Negated() = %v, expected %v", neg.Negated(), letters.p)
+	}
+}

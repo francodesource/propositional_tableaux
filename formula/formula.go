@@ -56,6 +56,10 @@ func NewNot(negated Formula) Not {
 	return Not{negated: negated}
 }
 
+func (n Not) Negated() Formula {
+	return n.negated
+}
+
 func (n Not) Class() Classification {
 	switch inner := n.negated.(type) {
 	case Letter:
