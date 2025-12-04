@@ -1,6 +1,8 @@
 package fsets
 
 import (
+	"iter"
+	"maps"
 	"propositional_tableaux/formula"
 )
 
@@ -24,4 +26,8 @@ func (s FormulaSet) Has(f formula.Formula) bool {
 
 func (s FormulaSet) HasComplementaryOf(literal formula.Formula) bool {
 	return s.Has(formula.Complement(literal))
+}
+
+func (s FormulaSet) Iter() iter.Seq[formula.Formula] {
+	return maps.Keys(s.values)
 }
