@@ -4,6 +4,7 @@ import (
 	"iter"
 	"maps"
 	"propositional_tableaux/formula"
+	"strings"
 )
 
 type FormulaSet struct {
@@ -17,6 +18,16 @@ func New(formulas ...formula.Formula) FormulaSet {
 		values[v] = struct{}{}
 	}
 	return FormulaSet{values: values}
+}
+
+func (s FormulaSet) String() string {
+	strs := make([]string, 0, len(s.values))
+
+	for f := range s.Iter() {
+		strs = append(strs, f.String())
+	}
+
+	return "{" + strings.Join(strs, ", ") + "}"
 }
 
 func (s FormulaSet) Has(f formula.Formula) bool {

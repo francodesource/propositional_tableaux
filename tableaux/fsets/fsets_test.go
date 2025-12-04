@@ -5,6 +5,47 @@ import (
 	"testing"
 )
 
+func TestFormulaSet_String(t *testing.T) {
+	tests := []struct {
+		name string
+		set  FormulaSet
+		want string
+	}{
+		{
+			"empty",
+			New(),
+			"{}",
+		},
+		{
+			"singleton",
+			New(formula.NewLetter("p")),
+			"{p}",
+		},
+		{
+			"formula",
+			New(
+				formula.NewAnd(
+					formula.NewLetter("p"),
+					formula.NewLetter("q")),
+				formula.NewNot(formula.NewAnd(
+					formula.NewLetter("p"),
+					formula.NewLetter("q")),
+				),
+			),
+
+			"{(p & q), !(p & q)}",
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.want != tt.set.String() {
+				t.Errorf("got %v, want %v", tt.set.String(), tt.want)
+			}
+		})
+	}
+}
+
 func TestFormulaSet_HasComplementaryOf(t *testing.T) {
 	tests := []struct {
 		name string
@@ -35,5 +76,4 @@ func TestFormulaSet_HasComplementaryOf(t *testing.T) {
 			}
 		})
 	}
-
 }
