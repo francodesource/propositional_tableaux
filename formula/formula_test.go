@@ -226,5 +226,20 @@ func TestFormula_Class(t *testing.T) {
 			}
 		})
 	}
+}
 
+func TestBinary_Getters(t *testing.T) {
+	and := NewAnd(letters.p, letters.q)
+
+	if and.Op() != And {
+		t.Errorf("expected op = %v, got %v", And, and.Op())
+	}
+
+	if and.Left() != letters.p {
+		t.Errorf("expected left = %v, got %v", letters.p, and.Left())
+	}
+
+	if and.Right() != letters.q {
+		t.Errorf("expected right = %v, got %v", letters.q, and.Right())
+	}
 }

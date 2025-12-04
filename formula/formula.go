@@ -115,6 +115,18 @@ type Binary struct {
 	op          Operator
 }
 
+func (b Binary) Left() Formula {
+	return b.left
+}
+
+func (b Binary) Right() Formula {
+	return b.right
+}
+
+func (b Binary) Op() Operator {
+	return b.op
+}
+
 func NewBinary(left, right Formula, op Operator) Binary {
 	return Binary{left: left, right: right, op: op}
 }
