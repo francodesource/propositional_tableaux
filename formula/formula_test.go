@@ -251,3 +251,40 @@ func TestNot_Negated(t *testing.T) {
 		t.Errorf("Negated() = %v, expected %v", neg.Negated(), letters.p)
 	}
 }
+
+func TestIsLiteral(t *testing.T) {
+	tests := []struct {
+		name    string
+		formula Formula
+		want    bool
+	}{
+		{
+			"letter",
+			letters.p,
+			true,
+		},
+		{
+			"literal",
+			NewNot(letters.p),
+			true,
+		},
+		{
+			"binary formula",
+			NewNor(letters.p, NewNot(letters.q)),
+			false,
+		},
+		{
+			"binary formula negated",
+			NewNot(NewAnd(letters.p, letters.q)),
+			false,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if IsLiteral(tt.formula) != tt.want {
+				t.Errorf("IsLiteral(%v) = %v, want %v", tt.formula, IsLiteral(tt.formula), tt.want)
+			}
+		})
+	}
+}

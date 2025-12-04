@@ -176,3 +176,16 @@ func (b Binary) String() string {
 
 	return res
 }
+
+func IsLiteral(formula Formula) bool {
+	if _, ok := formula.(Letter); ok {
+		return true
+	}
+
+	if not, ok := formula.(Not); ok {
+		_, ok := not.Negated().(Letter)
+		return ok
+	}
+
+	return false
+}
