@@ -2,7 +2,29 @@ package formula
 
 import "fmt"
 
+type Classification int
+
+const (
+	Alpha                  = -1
+	Literal Classification = 0
+	Beta                   = 1
+)
+
+func (c Classification) String() string {
+	switch c {
+	case Literal:
+		return "Literal"
+	case Alpha:
+		return "Alpha"
+	case Beta:
+		return "Beta"
+	default:
+		panic("unknown Classification")
+	}
+}
+
 type Formula interface {
+	Class() Classification
 	String() string
 }
 
@@ -18,6 +40,10 @@ func (l Letter) Name() string {
 	return l.name
 }
 
+func (l Letter) Class() Classification {
+	return Literal
+}
+
 func (l Letter) String() string {
 	return l.name
 }
@@ -28,6 +54,20 @@ type Not struct {
 
 func NewNot(negated Formula) Not {
 	return Not{negated: negated}
+}
+
+func (n Not) Class() Classification {
+	switch inner := n.negated.(type) {
+	case Letter:
+		return Literal
+	case Not:
+		return Alpha
+	case Binary:
+		return inner.Class() * -1
+
+	default:
+		panic(fmt.Errorf("%v: %T is not a Formula", inner, inner))
+	}
 }
 
 func (n Not) String() string {
@@ -104,6 +144,15 @@ func NewBiconditional(left, right Formula) Binary {
 }
 func NewXor(left, right Formula) Binary {
 	return NewBinary(left, right, Xor)
+}
+
+func (b Binary) Class() Classification {
+	switch b.op {
+	case And, Nor, Biconditional:
+		return Alpha
+	default:
+		return Beta
+	}
 }
 
 func (b Binary) String() string {

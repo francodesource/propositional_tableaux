@@ -120,3 +120,111 @@ func TestFormula_String(t *testing.T) {
 		})
 	}
 }
+
+func TestFormula_Class(t *testing.T) {
+	// A and B are just some random formulas, used for testing a more generic kind of formulas instead of only literals
+	// and operators.
+	A := NewNot(NewOr(letters.t, letters.r))
+	B := NewBiconditional(NewImplies(letters.p, letters.q), letters.r)
+
+	tests := []struct {
+		name     string
+		formula  Formula
+		expected Classification
+	}{
+		// Literals
+		{
+			name:     "letter",
+			formula:  letters.p,
+			expected: Literal,
+		},
+		{
+			name:     "literal",
+			formula:  NewNot(letters.p),
+			expected: Literal,
+		},
+		// Alpha-formulas
+		{
+			name:     "double negation",
+			formula:  NewNot(NewNot(letters.p)),
+			expected: Alpha,
+		},
+		{
+			name:     "or negation",
+			formula:  NewNot(NewOr(A, letters.p)),
+			expected: Alpha,
+		},
+		{
+			name:     "implication negation",
+			formula:  NewNot(NewImplies(A, B)),
+			expected: Alpha,
+		},
+		{
+			name:     "nand negation",
+			formula:  NewNot(NewNand(letters.p, letters.p1)),
+			expected: Alpha,
+		},
+		{
+			name:     "nor",
+			formula:  NewNor(A, B),
+			expected: Alpha,
+		},
+		{
+			name:     "biconditional",
+			formula:  NewBiconditional(A, B),
+			expected: Alpha,
+		},
+		{
+			name:     "xor negation",
+			formula:  NewNot(NewXor(A, B)),
+			expected: Alpha,
+		},
+		// Beta-formulas
+		{
+			name:     "and negation",
+			formula:  NewNot(NewAnd(A, letters.p)),
+			expected: Beta,
+		},
+		{
+			name:     "or",
+			formula:  NewOr(A, B),
+			expected: Beta,
+		},
+		{
+			name:     "implication",
+			formula:  NewImplies(letters.p, letters.p1),
+			expected: Beta,
+		},
+		{
+			name:     "nand",
+			formula:  NewNand(letters.p, letters.p1),
+			expected: Beta,
+		},
+		{
+			name:     "nor negation",
+			formula:  NewNot(NewNor(A, B)),
+			expected: Beta,
+		},
+		{
+			name:     "biconditional negation",
+			formula:  NewNot(NewBiconditional(A, B)),
+			expected: Beta,
+		},
+		{
+			name:     "xor",
+			formula:  NewXor(A, B),
+			expected: Beta,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			res := tt.formula.Class()
+
+			if res != tt.expected {
+				t.Errorf("got %v want %v", res, tt.expected)
+			}
+		})
+	}
+
+}
