@@ -42,3 +42,15 @@ func (s FormulaSet) HasComplementaryOf(literal formula.Formula) bool {
 func (s FormulaSet) Iter() iter.Seq[formula.Formula] {
 	return maps.Keys(s.values)
 }
+
+// Add adds all the passed formulas in-place and returns itself.
+// If a formula is already contained it will be overwritten.
+// If a formula is nil it won't be added.
+func (s FormulaSet) Add(formulas ...formula.Formula) FormulaSet {
+	for _, f := range formulas {
+		if f != nil {
+			s.values[f] = struct{}{}
+		}
+	}
+	return s
+}
