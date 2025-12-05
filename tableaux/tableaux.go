@@ -153,6 +153,7 @@ func buildSemanticTableaux(node *Node) {
 				formulas: newSet,
 			}
 			buildSemanticTableaux(node.left)
+			return
 		case formula.Beta:
 			left, right := ApplyRule(f)
 			leftSet := fsets.Remove(node.formulas, f).Add(left)
@@ -168,6 +169,7 @@ func buildSemanticTableaux(node *Node) {
 
 			buildSemanticTableaux(node.left)
 			buildSemanticTableaux(node.right)
+			return
 		}
 	}
 }
