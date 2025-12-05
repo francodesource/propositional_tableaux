@@ -55,6 +55,10 @@ func (s FormulaSet) Add(formulas ...formula.Formula) FormulaSet {
 	return s
 }
 
+func (s FormulaSet) Len() int {
+	return len(s.values)
+}
+
 // Remove returns a new FormulaSet without the specified value.
 // If s does not contain the value, a copy of s will be returned.
 func Remove(s FormulaSet, value formula.Formula) FormulaSet {
