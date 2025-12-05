@@ -3,6 +3,7 @@ package fsets
 import (
 	"maps"
 	"propositional_tableaux/formula"
+	tu "propositional_tableaux/internal/testutil"
 	"testing"
 )
 
@@ -149,6 +150,44 @@ func TestFormulaSet_Add(t *testing.T) {
 			res := tt.set.Add(tt.toAdd...)
 
 			if !maps.Equal(res.values, tt.want.values) {
+				t.Errorf("got %v, want %v", res, tt.want)
+			}
+		})
+	}
+}
+
+func TestFormulaSet_Len(t *testing.T) {
+	tests := []struct {
+		name string
+		set  FormulaSet
+		want int
+	}{
+		{
+			"empty",
+			New(),
+			0,
+		},
+		{
+			"one",
+			New(formula.NewLetter("p")),
+			1,
+		},
+		{
+			"three",
+			New(
+				tu.P,
+				formula.NewNot(tu.Q),
+				formula.NewNand(tu.R, tu.S),
+			),
+			3,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			res := tt.set.Len()
+
+			if res != tt.want {
 				t.Errorf("got %v, want %v", res, tt.want)
 			}
 		})
