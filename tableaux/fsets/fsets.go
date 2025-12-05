@@ -66,3 +66,7 @@ func Remove(s FormulaSet, value formula.Formula) FormulaSet {
 	delete(res, value)
 	return FormulaSet{res}
 }
+
+func Clone(s FormulaSet) FormulaSet {
+	return FormulaSet{maps.Clone(s.values)}
+}
