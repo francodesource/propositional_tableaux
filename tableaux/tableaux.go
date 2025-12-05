@@ -2,7 +2,7 @@ package tableaux
 
 import (
 	"propositional_tableaux/formula"
-	"propositional_tableaux/tableaux/fsets"
+	"propositional_tableaux/tableaux/tsets"
 	"strings"
 )
 
@@ -28,7 +28,7 @@ func (m Mark) String() string {
 }
 
 type Node struct {
-	formulas    fsets.FormulaSet
+	formulas    tsets.TSet
 	left, right *Node
 	mark        Mark
 }
@@ -85,7 +85,7 @@ func eval(node *Node) []Assignment {
 		assignment := make(Assignment)
 
 		if node.mark == Open {
-			for literal := range node.formulas.Iter() {
+			for literal := range node.formulas.IterLiterals() {
 				// here I use AsLiteral because if the construction is correct all formulas in an open leaf are literals
 				// if not, it is a bug in the construction so it is correct to panic.
 				literal := formula.AsLiteral(literal)
@@ -115,49 +115,39 @@ func (node *Node) Eval() []Assignment {
 }
 
 func buildSemanticTableaux(node *Node) {
-	allLiterals := true
-	complementaryPair := false
 
-	for f := range node.formulas.Iter() {
-		if !formula.IsLiteral(f) {
-			allLiterals = false
-			break
-		} else {
-			if node.formulas.HasComplementaryOf(f) {
-				complementaryPair = true
-			}
-		}
-	}
-
-	if allLiterals && complementaryPair {
+	if node.formulas.HasOnlyLiterals() && node.formulas.HasComplementaryLiterals() {
 		node.mark = Closed
 		return
 	}
 
 	// Here the condition is that the set is composed of all literals alpha_and
 	// there is not a complementary pair of literals
-	if allLiterals {
+	if node.formulas.HasOnlyLiterals() {
 		node.mark = Open
 		return
 	}
 
 	// If it reaches here U(l) contains non-literals
-	for f := range node.formulas.Iter() {
-		switch f.Class() {
-		case formula.LiteralClass:
-			continue
-		case formula.Alpha:
-			left, right := ApplyRule(f)
-			newSet := fsets.Remove(node.formulas, f).Add(left, right)
+	// First check for alpha formulas
+	if node.formulas.HasAlpha() {
+		for alpha := range node.formulas.IterAlpha() {
+			left, right := ApplyRule(alpha)
+			newSet := tsets.RemoveAlpha(node.formulas, alpha)
+			newSet.Add(left)
+			newSet.Add(right)
+
 			node.left = &Node{
 				formulas: newSet,
 			}
 			buildSemanticTableaux(node.left)
 			return
-		case formula.Beta:
-			left, right := ApplyRule(f)
-			leftSet := fsets.Remove(node.formulas, f).Add(left)
-			rightSet := fsets.Remove(node.formulas, f).Add(right)
+		}
+	} else if node.formulas.HasBeta() {
+		for beta := range node.formulas.IterBeta() {
+			left, right := ApplyRule(beta)
+			leftSet := tsets.RemoveBeta(node.formulas, beta).Add(left)
+			rightSet := tsets.RemoveBeta(node.formulas, beta).Add(right)
 
 			node.left = &Node{
 				formulas: leftSet,
@@ -176,7 +166,7 @@ func buildSemanticTableaux(node *Node) {
 
 func BuildSemanticTableaux(f formula.Formula) *Node {
 	node := &Node{
-		formulas: fsets.New(f),
+		formulas: tsets.NewTSet().Add(f),
 	}
 
 	buildSemanticTableaux(node)
