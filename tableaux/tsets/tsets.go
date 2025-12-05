@@ -22,14 +22,23 @@ func NewTSet() TSet {
 	}
 }
 
-func (s TSet) Add(f formula.Formula) TSet {
-	switch f.Class() {
-	case formula.LiteralClass:
-		s.literals = s.literals.Add(f)
-	case formula.Alpha:
-		s.alphaFormulas = s.alphaFormulas.Add(f)
-	case formula.Beta:
-		s.betaFormulas = s.betaFormulas.Add(f)
+func (s TSet) addOne(f formula.Formula) TSet {
+	if f != nil {
+		switch f.Class() {
+		case formula.LiteralClass:
+			s.literals = s.literals.Add(f)
+		case formula.Alpha:
+			s.alphaFormulas = s.alphaFormulas.Add(f)
+		case formula.Beta:
+			s.betaFormulas = s.betaFormulas.Add(f)
+		}
+	}
+	return s
+}
+
+func (s TSet) Add(fs ...formula.Formula) TSet {
+	for _, f := range fs {
+		s.addOne(f)
 	}
 	return s
 }
@@ -85,7 +94,7 @@ func RemoveAlpha(set TSet, f formula.Formula) TSet {
 	return TSet{
 		literals:      fsets.Clone(set.literals),
 		alphaFormulas: alphaSet,
-		betaFormulas:  fsets.Clone(set.literals),
+		betaFormulas:  fsets.Clone(set.betaFormulas),
 	}
 }
 
@@ -93,7 +102,7 @@ func RemoveBeta(set TSet, f formula.Formula) TSet {
 	betaSet := fsets.Remove(set.betaFormulas, f)
 	return TSet{
 		literals:      fsets.Clone(set.literals),
-		alphaFormulas: fsets.Clone(set.literals),
+		alphaFormulas: fsets.Clone(set.alphaFormulas),
 		betaFormulas:  betaSet,
 	}
 }
