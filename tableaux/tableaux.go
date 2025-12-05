@@ -74,7 +74,7 @@ func (node *Node) IsLeaf() bool {
 }
 
 // Assignment represents a truth assignment for propositional letters. If a propositional letter is missing,
-// it can be assigned either true or false, as it does not affect the evaluation of the formulas.
+// it can be assigned either true beta_or false, as it does not affect the evaluation of the formulas.
 type Assignment map[string]bool
 
 func eval(node *Node) []Assignment {
@@ -134,7 +134,7 @@ func buildSemanticTableaux(node *Node) {
 		return
 	}
 
-	// Here the condition is that the set is composed of all literals and
+	// Here the condition is that the set is composed of all literals alpha_and
 	// there is not a complementary pair of literals
 	if allLiterals {
 		node.mark = Open
