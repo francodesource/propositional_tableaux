@@ -1,6 +1,7 @@
 package tsets
 
 import (
+	"fmt"
 	"iter"
 	"propositional_tableaux/formula"
 	"propositional_tableaux/tableaux/fsets"
@@ -72,6 +73,11 @@ func (s TSet) IterAlpha() iter.Seq[formula.Formula] {
 
 func (s TSet) IterBeta() iter.Seq[formula.Formula] {
 	return s.betaFormulas.Iter()
+}
+
+func (s TSet) String() string {
+	return fmt.Sprintf("{ literals: %s, alpha: %s, beta: %s }",
+		s.literals.String(), s.alphaFormulas.String(), s.betaFormulas.String())
 }
 
 func RemoveAlpha(set TSet, f formula.Formula) TSet {
