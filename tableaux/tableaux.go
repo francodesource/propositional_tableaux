@@ -73,6 +73,14 @@ func (node *Node) IsLeaf() bool {
 	return node.left == nil && node.right == nil
 }
 
+func (node *Node) Height() int {
+	if node == nil {
+		return 0
+	}
+
+	return 1 + max(node.left.Height(), node.right.Height())
+}
+
 // Assignment represents a truth assignment for propositional letters. If a propositional letter is missing,
 // it can be assigned either true beta_or false, as it does not affect the evaluation of the formulas.
 type Assignment map[string]bool
@@ -134,13 +142,18 @@ func buildSemanticTableaux(node *Node) {
 		for alpha := range node.formulas.IterAlpha() {
 			left, right := ApplyRule(alpha)
 			newSet := tsets.RemoveAlpha(node.formulas, alpha)
-			newSet.Add(left)
-			newSet.Add(right)
+			hasComplement := newSet.Add(left, right)
 
 			node.left = &Node{
 				formulas: newSet,
 			}
-			buildSemanticTableaux(node.left)
+
+			if !hasComplement {
+				buildSemanticTableaux(node.left)
+			} else {
+				node.left.mark = Closed
+			}
+
 			return
 		}
 	} else if node.formulas.HasBeta() {
@@ -148,10 +161,10 @@ func buildSemanticTableaux(node *Node) {
 			left, right := ApplyRule(beta)
 
 			leftSet := tsets.RemoveBeta(node.formulas, beta)
-			leftSet.Add(left)
+			hasLeftComplement := leftSet.Add(left)
 
 			rightSet := tsets.RemoveBeta(node.formulas, beta)
-			rightSet.Add(right)
+			hasRightComplement := rightSet.Add(right)
 
 			node.left = &Node{
 				formulas: leftSet,
@@ -161,8 +174,18 @@ func buildSemanticTableaux(node *Node) {
 				formulas: rightSet,
 			}
 
-			buildSemanticTableaux(node.left)
-			buildSemanticTableaux(node.right)
+			if !hasLeftComplement {
+				buildSemanticTableaux(node.left)
+			} else {
+				node.left.mark = Closed
+			}
+
+			if !hasRightComplement {
+				buildSemanticTableaux(node.right)
+			} else {
+				node.right.mark = Closed
+			}
+
 			return
 		}
 	}

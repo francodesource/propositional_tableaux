@@ -89,3 +89,22 @@ func TestBuildSemanticTableaux(t *testing.T) {
 		})
 	}
 }
+
+// TestBuildSemanticTableaux2 checks the improvement of checking for complementary formula.
+func TestBuildSemanticTableaux2(t *testing.T) {
+	inner := formula.NewNand(
+		formula.NewOr(tu.P, formula.NewBiconditional(tu.Q, tu.R)),
+		formula.NewBiconditional(tu.P1, formula.NewXor(tu.R, tu.S)))
+
+	f := formula.NewAnd(inner, formula.NewNot(inner))
+	tab := BuildSemanticTableaux(f)
+	assignment := tab.Eval()
+
+	if len(assignment) > 0 {
+		t.Errorf("expected formula to be unasat")
+	}
+
+	if tab.Height() != 2 {
+		t.Errorf("expected tableaux to be of minimal length 2")
+	}
+}
