@@ -22,25 +22,45 @@ func NewTSet() TSet {
 	}
 }
 
-func (s TSet) addOne(f formula.Formula) TSet {
+func asByte(b bool) byte {
+	if b {
+		return 1
+	}
+
+	return 0
+}
+
+// addOne add an element to the set. If the element is already contained, it will be overwritten.
+// If f is nil, it will not be added.
+// Returns 1 if this set contains the complement of f, 0 otherwise.
+func (s TSet) addOne(f formula.Formula) byte {
 	if f != nil {
 		switch f.Class() {
 		case formula.LiteralClass:
-			s.literals = s.literals.Add(f)
+
+			s.literals.Add(f)
+			return asByte(s.literals.HasComplementaryOf(f))
 		case formula.Alpha:
-			s.alphaFormulas = s.alphaFormulas.Add(f)
+			s.alphaFormulas.Add(f)
+			// if a formula is an alpha formula, its complement is a beta formula and vice versa.
+			return asByte(s.betaFormulas.HasComplementaryOf(f))
 		case formula.Beta:
-			s.betaFormulas = s.betaFormulas.Add(f)
+			s.betaFormulas.Add(f)
+			return asByte(s.alphaFormulas.HasComplementaryOf(f))
 		}
 	}
-	return s
+
+	return 0
 }
 
-func (s TSet) Add(fs ...formula.Formula) TSet {
+// Add adds all the passed elements to the set s and returns true if s contains the complement of at least one element,
+// false otherwise.
+func (s TSet) Add(fs ...formula.Formula) bool {
+	var flag byte = 0
 	for _, f := range fs {
-		s.addOne(f)
+		flag = flag | s.addOne(f) // using bitwise operator to avoid lazy evaluation.
 	}
-	return s
+	return flag == 1
 }
 
 func (s TSet) Len() int {

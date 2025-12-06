@@ -146,8 +146,12 @@ func buildSemanticTableaux(node *Node) {
 	} else if node.formulas.HasBeta() {
 		for beta := range node.formulas.IterBeta() {
 			left, right := ApplyRule(beta)
-			leftSet := tsets.RemoveBeta(node.formulas, beta).Add(left)
-			rightSet := tsets.RemoveBeta(node.formulas, beta).Add(right)
+
+			leftSet := tsets.RemoveBeta(node.formulas, beta)
+			leftSet.Add(left)
+
+			rightSet := tsets.RemoveBeta(node.formulas, beta)
+			rightSet.Add(right)
 
 			node.left = &Node{
 				formulas: leftSet,
@@ -166,9 +170,9 @@ func buildSemanticTableaux(node *Node) {
 
 func BuildSemanticTableaux(f formula.Formula) *Node {
 	node := &Node{
-		formulas: tsets.NewTSet().Add(f),
+		formulas: tsets.NewTSet(),
 	}
-
+	node.formulas.Add(f)
 	buildSemanticTableaux(node)
 
 	return node
