@@ -1,6 +1,7 @@
 package tableaux
 
 import (
+	"maps"
 	"propositional_tableaux/formula"
 	tu "propositional_tableaux/internal/testutil"
 	"testing"
@@ -20,6 +21,11 @@ var (
 	unsat = formula.NewAnd(
 		formula.NewOr(tu.P, tu.Q),
 		formula.NewAnd(formula.Complement(tu.P), formula.Complement(tu.Q)),
+	)
+
+	sat = formula.NewAnd(
+		tu.P,
+		formula.NewOr(formula.NewNot(tu.Q), formula.NewNot(tu.P)),
 	)
 )
 
@@ -49,6 +55,14 @@ func TestBuildSemanticTableaux(t *testing.T) {
 			unsat,
 			[]Assignment{},
 		},
+		{
+			"sat",
+			sat,
+			[]Assignment{{
+				"P": true,
+				"Q": false,
+			}},
+		},
 	}
 
 	for _, tt := range tests {
@@ -56,10 +70,21 @@ func TestBuildSemanticTableaux(t *testing.T) {
 			tab := BuildSemanticTableaux(tt.f)
 			got := tab.Eval()
 
-			// for now, I just check the length of the assignments
 			if len(got) != len(tt.want) {
-				t.Errorf("got %v, want %v", got, tt.want)
-				return
+				t.Errorf("want %v, got %v", tt.want, got)
+			}
+
+			equalCounter := 0
+			for _, assignment1 := range tt.want {
+				for _, assignment2 := range got {
+					if maps.Equal(assignment2, assignment1) {
+						equalCounter++
+					}
+				}
+			}
+
+			if equalCounter != len(tt.want) {
+				t.Errorf("want %v, got %v", tt.want, got)
 			}
 		})
 	}
