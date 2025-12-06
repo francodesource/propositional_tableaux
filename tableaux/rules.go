@@ -7,23 +7,59 @@ import (
 
 type Rule func(left, right formula.Formula) (formula.Formula, formula.Formula)
 
-func alpha_and(left, right formula.Formula) (formula.Formula, formula.Formula) {
+func and(left, right formula.Formula) (formula.Formula, formula.Formula) {
 	return left, right
 }
 
-func beta_or(left, right formula.Formula) (formula.Formula, formula.Formula) {
+func or(left, right formula.Formula) (formula.Formula, formula.Formula) {
 	return left, right
+}
+
+func not_and(left, right formula.Formula) (formula.Formula, formula.Formula) {
+	return formula.NewNot(left), formula.NewNot(right)
+}
+
+func not_or(left, right formula.Formula) (formula.Formula, formula.Formula) {
+	return formula.NewNot(left), formula.NewNot(right)
+}
+func implies(left, right formula.Formula) (formula.Formula, formula.Formula) {
+	return formula.NewNot(left), right
+}
+
+func not_implies(left, right formula.Formula) (formula.Formula, formula.Formula) {
+	return left, formula.NewNot(right)
+}
+
+func biconditional(left, right formula.Formula) (formula.Formula, formula.Formula) {
+	return formula.NewImplies(left, right), formula.NewImplies(right, left)
+}
+
+func not_biconditional(left, right formula.Formula) (formula.Formula, formula.Formula) {
+	return formula.NewNot(formula.NewImplies(left, right)), formula.NewNot(formula.NewImplies(right, left))
 }
 
 const OperatorsCount = 7
 
+// alphaRules is the set of rules for alpha formulas. It assumes negation and consider inner operator.
+// Double negation is considered to be a special case, so it is not contained in this array.
 var alphaRules = [OperatorsCount]Rule{
-	alpha_and,
+	and,
+	not_or,
+	not_implies,
+	and,    // negated nand is the same as and
+	not_or, // not or is the same as nor
+	biconditional,
+	biconditional, // biconditional is '=', xor is '!=' so negated xor is the same as biconditional
 }
 
 var betaRules = [OperatorsCount]Rule{
-	nil,
-	beta_or,
+	not_and,
+	or,
+	implies,
+	not_and,
+	or,
+	not_biconditional,
+	not_biconditional,
 }
 
 func applyAlphaOrBetaRule(op formula.Operator, class formula.Classification,
