@@ -81,6 +81,14 @@ func (node *Node) Height() int {
 	return 1 + max(node.left.Height(), node.right.Height())
 }
 
+func (node *Node) MarkAsClosed() {
+	node.mark = Closed
+}
+
+func (node *Node) MarkAsOpen() {
+	node.mark = Open
+}
+
 // Assignment represents a truth assignment for propositional letters. If a propositional letter is missing,
 // it can be assigned either true beta_or false, as it does not affect the evaluation of the formulas.
 type Assignment map[string]bool
@@ -125,14 +133,14 @@ func (node *Node) Eval() []Assignment {
 func buildSemanticTableaux(node *Node) {
 
 	if node.formulas.HasOnlyLiterals() && node.formulas.HasComplementaryLiterals() {
-		node.mark = Closed
+		node.MarkAsClosed()
 		return
 	}
 
 	// Here the condition is that the set is composed of all literals alpha_and
 	// there is not a complementary pair of literals
 	if node.formulas.HasOnlyLiterals() {
-		node.mark = Open
+		node.MarkAsOpen()
 		return
 	}
 
@@ -151,7 +159,7 @@ func buildSemanticTableaux(node *Node) {
 			if !hasComplement {
 				buildSemanticTableaux(node.left)
 			} else {
-				node.left.mark = Closed
+				node.left.MarkAsClosed()
 			}
 
 			return
@@ -177,13 +185,13 @@ func buildSemanticTableaux(node *Node) {
 			if !hasLeftComplement {
 				buildSemanticTableaux(node.left)
 			} else {
-				node.left.mark = Closed
+				node.left.MarkAsClosed()
 			}
 
 			if !hasRightComplement {
 				buildSemanticTableaux(node.right)
 			} else {
-				node.right.mark = Closed
+				node.right.MarkAsClosed()
 			}
 
 			return
