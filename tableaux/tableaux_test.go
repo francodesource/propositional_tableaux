@@ -1,10 +1,16 @@
 package tableaux
 
 import (
+	"fmt"
 	"maps"
+	"math/big"
+	"math/rand"
 	"propositional_tableaux/formula"
 	tu "propositional_tableaux/internal/testutil"
+	"reflect"
+	"slices"
 	"testing"
+	"testing/quick"
 )
 
 var (
@@ -106,5 +112,128 @@ func TestBuildSemanticTableaux2(t *testing.T) {
 
 	if tab.Height() != 2 {
 		t.Errorf("expected tableaux to be of minimal length 2")
+	}
+}
+
+/*
+	Property based testing
+*/
+
+func allLetters(f formula.Formula, letters map[string]struct{}) {
+	switch f := f.(type) {
+	case formula.Letter:
+		letters[f.Name()] = struct{}{}
+	case formula.Not:
+		allLetters(f.Negated(), letters)
+	case formula.Binary:
+		allLetters(f.Left(), letters)
+		allLetters(f.Right(), letters)
+	}
+}
+
+func evaluate(f formula.Formula, assignment Assignment) bool {
+	switch f := f.(type) {
+	case formula.Letter:
+		return assignment[f.Name()]
+	case formula.Not:
+		return !evaluate(f.Negated(), assignment)
+	case formula.Binary:
+		switch f.Op() {
+		case formula.And:
+			return evaluate(f.Left(), assignment) && evaluate(f.Right(), assignment)
+		case formula.Or:
+			return evaluate(f.Left(), assignment) || evaluate(f.Right(), assignment)
+		case formula.Implies:
+			return !evaluate(f.Left(), assignment) || evaluate(f.Right(), assignment)
+		case formula.Nand:
+			return !(evaluate(f.Left(), assignment) && evaluate(f.Right(), assignment))
+		case formula.Nor:
+			return !(evaluate(f.Left(), assignment) || evaluate(f.Right(), assignment))
+		case formula.Biconditional:
+			return evaluate(f.Left(), assignment) == evaluate(f.Right(), assignment)
+		case formula.Xor:
+			return evaluate(f.Left(), assignment) != evaluate(f.Right(), assignment)
+		default:
+			panic("unreachable")
+		}
+	default:
+		panic(fmt.Errorf("%T is not a formula", f))
+	}
+}
+
+func allAssignmentsAux(letters []string, assignments []Assignment) {
+	one := big.NewInt(1)
+	counter := big.NewInt(0)
+
+	for i := range len(assignments) {
+		for j := 0; j < len(letters); j++ {
+			assignments[i][letters[j]] = counter.Bit(j) == 1
+		}
+		counter.Add(counter, one)
+	}
+}
+
+func allAssignments(f formula.Formula) []Assignment {
+	m := make(map[string]struct{})
+	allLetters(f, m)
+	letters := slices.Collect(maps.Keys(m))
+
+	// initializing all assignments to 2^n
+	res := make([]Assignment, 1<<len(letters))
+	for i := range res {
+		res[i] = make(Assignment, len(letters))
+	}
+
+	allAssignmentsAux(letters, res)
+	return res
+}
+
+func bruteForceSat(f formula.Formula) bool {
+	as := allAssignments(f)
+
+	sat := false
+
+	for _, a := range as {
+		sat = sat || evaluate(f, a)
+	}
+	return sat
+}
+
+func generateFormula(rand *rand.Rand, size int) formula.Formula {
+	if size == 0 {
+		letters := "pqrstuvwxyz"
+		randLetter := letters[rand.Intn(len(letters))]
+		return formula.NewLetter(string(randLetter))
+	}
+
+	negation := rand.Intn(2) == 1
+
+	if negation {
+		return formula.NewNot(generateFormula(rand, size-1))
+	} else {
+		return formula.NewBinary(generateFormula(rand, size-1), generateFormula(rand, size-1),
+			formula.Operator(rand.Intn(7))) // random binary operation
+	}
+}
+
+func TestBuildSemanticTableaux3(t *testing.T) {
+	f := func(f formula.Formula) bool {
+		bfSat := bruteForceSat(f)
+		tab := BuildSemanticTableaux(f)
+		tabSat := len(tab.Eval()) > 0
+
+		return bfSat == tabSat
+	}
+
+	maxSize := 12 // this is reasonable
+	config := &quick.Config{
+		MaxCount: 10,
+		Values: func(values []reflect.Value, r *rand.Rand) {
+			values[0] = reflect.ValueOf(generateFormula(r, r.Intn(maxSize)))
+		},
+	}
+
+	if err := quick.Check(f, config); err != nil {
+		t.Error(err)
 	}
 }
