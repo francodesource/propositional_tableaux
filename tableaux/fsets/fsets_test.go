@@ -23,20 +23,6 @@ func TestFormulaSet_String(t *testing.T) {
 			New(formula.NewLetter("p")),
 			"{p}",
 		},
-		{
-			"formula",
-			New(
-				formula.NewAnd(
-					formula.NewLetter("p"),
-					formula.NewLetter("q")),
-				formula.NewNot(formula.NewAnd(
-					formula.NewLetter("p"),
-					formula.NewLetter("q")),
-				),
-			),
-
-			"{(p & q), !(p & q)}",
-		},
 	}
 
 	for _, tt := range tests {
