@@ -116,6 +116,74 @@ func TestBuildSemanticTableaux2(t *testing.T) {
 	}
 }
 
+// TestBuildSemanticTableaux_Tautologies checks that given a negated tautology the semantic tableaux produces a
+// closed tableaux, which means that Eval() produces 0 assignments.
+func TestBuildSemanticTableaux_Tautologies(t *testing.T) {
+	tests := []struct {
+		name string
+		f    formula.Formula
+	}{
+		{
+			name: "excluded middle",
+			f:    formula.NewOr(tu.P, formula.NewNot(tu.P)),
+		},
+		{
+			name: "contraposition",
+			f: formula.NewBiconditional(
+				formula.NewImplies(tu.P, tu.Q),
+				formula.NewImplies(formula.NewNot(tu.Q), formula.NewNot(tu.P)),
+			),
+		},
+		{
+			name: "reductio ad absurdum",
+			f: formula.NewImplies(
+				formula.NewAnd(
+					formula.NewImplies(formula.NewNot(tu.P), tu.Q),
+					formula.NewImplies(formula.NewNot(tu.P), formula.NewNot(tu.Q)),
+				),
+				tu.P,
+			),
+		},
+		{
+			name: "De Morgan's law",
+			f: formula.NewBiconditional(
+				formula.NewNot(formula.NewAnd(tu.P, tu.Q)),
+				formula.NewOr(formula.NewNot(tu.P), formula.NewNot(tu.Q)),
+			),
+		},
+		{
+			name: "hypothetical syllogism",
+			f: formula.NewImplies(formula.NewAnd(
+				formula.NewImplies(tu.P, tu.Q),
+				formula.NewImplies(tu.Q, tu.R),
+			), formula.NewImplies(tu.P, tu.R)),
+		},
+		{
+			name: "proof by cases",
+			f: formula.NewImplies(
+				formula.NewAnd(
+					formula.NewOr(tu.P, tu.R),
+					formula.NewAnd(
+						formula.NewImplies(tu.P, tu.R),
+						formula.NewImplies(tu.Q, tu.R),
+					),
+				),
+				tu.R,
+			),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			tab := BuildSemanticTableaux(formula.NewNot(tt.f))
+			if len(tab.Eval()) > 0 {
+				t.Errorf("tableaux found assignments %v for tautology %v", tab.Eval(), tt.f)
+			}
+		})
+	}
+
+}
+
 /*
 	Property based testing
 */
