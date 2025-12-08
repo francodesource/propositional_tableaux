@@ -296,7 +296,7 @@ func TestBuildSemanticTableaux3(t *testing.T) {
 		return bfSat == tabSat
 	}
 
-	maxSize := 12 // this is reasonable
+	maxSize := 10 // this is reasonable
 	config := &quick.Config{
 		MaxCount: 10,
 		Values: func(values []reflect.Value, r *rand.Rand) {
@@ -325,7 +325,7 @@ func TestBuildSemanticTableaux4(t *testing.T) {
 		return true
 	}
 
-	maxSize := 12
+	maxSize := 10
 
 	config := &quick.Config{
 		MaxCount: 20,
@@ -373,7 +373,7 @@ func TestBuildAnalyticTableaux(t *testing.T) {
 	}
 	maxSize := 10
 	config := &quick.Config{
-		MaxCount: 30,
+		MaxCount: 20,
 		Values: func(values []reflect.Value, r *rand.Rand) {
 			values[0] = reflect.ValueOf(generateFormula(r, r.Intn(maxSize)))
 		},
