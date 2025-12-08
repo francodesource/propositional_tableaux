@@ -217,6 +217,8 @@ func generateFormula(rand *rand.Rand, size int) formula.Formula {
 	}
 }
 
+// TestBuildSemanticTableaux3 checks that the assignments discovered by the semantic tableaux are the same as
+// the one obtained by calculating all the truth-tables
 func TestBuildSemanticTableaux3(t *testing.T) {
 	f := func(f formula.Formula) bool {
 		bfSat := bruteForceSat(f)
@@ -239,6 +241,37 @@ func TestBuildSemanticTableaux3(t *testing.T) {
 	}
 }
 
+// TestBuildSemanticTableaux4 checks that the assignments obtained by a semantic tableaux, satisfy the formula.
+func TestBuildSemanticTableaux4(t *testing.T) {
+	f := func(f formula.Formula) bool {
+		tab := BuildSemanticTableaux(f)
+		assignments := tab.Eval()
+
+		for _, a := range assignments {
+			if !evaluate(f, a) {
+				fmt.Printf("test fail for formula %v with assignment %v", f, a)
+				return false
+			}
+		}
+
+		return true
+	}
+
+	maxSize := 12
+
+	config := &quick.Config{
+		MaxCount: 20,
+		Values: func(values []reflect.Value, r *rand.Rand) {
+			values[0] = reflect.ValueOf(generateFormula(r, r.Intn(maxSize)))
+		},
+	}
+
+	if err := quick.Check(f, config); err != nil {
+		t.Error(err)
+	}
+}
+
+// TestBuildAnalyticTableaux checks that the assignments discovered by the analytic tableaux are the same of the semantic one
 func TestBuildAnalyticTableaux(t *testing.T) {
 	f := func(f formula.Formula) bool {
 		semanticTab := BuildSemanticTableaux(f)
@@ -280,5 +313,35 @@ func TestBuildAnalyticTableaux(t *testing.T) {
 
 	if err := quick.Check(f, config); err != nil {
 		t.Errorf("%v", err)
+	}
+}
+
+// TestBuildAnalyticTableaux4 checks that the assignments obtained by an analytic tableaux, satisfy the formula.
+func TestBuildAnalyticTableaux2(t *testing.T) {
+	f := func(f formula.Formula) bool {
+		tab := BuildAnalyticTableaux(f)
+		assignments := tab.Eval()
+
+		for _, a := range assignments {
+			if !evaluate(f, a) {
+				fmt.Printf("test fail for formula %v with assignment %v", f, a)
+				return false
+			}
+		}
+
+		return true
+	}
+
+	maxSize := 10
+
+	config := &quick.Config{
+		MaxCount: 20,
+		Values: func(values []reflect.Value, r *rand.Rand) {
+			values[0] = reflect.ValueOf(generateFormula(r, r.Intn(maxSize)))
+		},
+	}
+
+	if err := quick.Check(f, config); err != nil {
+		t.Error(err)
 	}
 }
