@@ -1,6 +1,7 @@
 package tableaux
 
 import (
+	"encoding/json"
 	"fmt"
 	"maps"
 	"math/big"
@@ -235,5 +236,49 @@ func TestBuildSemanticTableaux3(t *testing.T) {
 
 	if err := quick.Check(f, config); err != nil {
 		t.Error(err)
+	}
+}
+
+func TestBuildAnalyticTableaux(t *testing.T) {
+	f := func(f formula.Formula) bool {
+		semanticTab := BuildSemanticTableaux(f)
+		analyticTab := BuildAnalyticTableaux(f)
+
+		sAssignments := semanticTab.Eval()
+		aAssignments := analyticTab.Eval()
+
+		if len(sAssignments) != len(aAssignments) {
+			t.Errorf("fail on formula: %v", f)
+			return false
+		}
+
+		slice1 := make([]string, len(sAssignments))
+		slice2 := make([]string, len(aAssignments))
+
+		for i := range sAssignments {
+			bytes1, _ := json.Marshal(sAssignments[i])
+			bytes2, _ := json.Marshal(aAssignments[i])
+
+			slice1[i] = string(bytes1)
+			slice2[i] = string(bytes2)
+		}
+		slices.Sort(slice1)
+		slices.Sort(slice2)
+		res := slices.Compare(slice1, slice2) == 0
+		if !res {
+			t.Errorf("fail on formula: %v", f)
+		}
+		return res
+	}
+	maxSize := 10
+	config := &quick.Config{
+		MaxCount: 30,
+		Values: func(values []reflect.Value, r *rand.Rand) {
+			values[0] = reflect.ValueOf(generateFormula(r, r.Intn(maxSize)))
+		},
+	}
+
+	if err := quick.Check(f, config); err != nil {
+		t.Errorf("%v", err)
 	}
 }

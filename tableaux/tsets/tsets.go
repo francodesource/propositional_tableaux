@@ -30,6 +30,18 @@ func asByte(b bool) byte {
 	return 0
 }
 
+func (s TSet) HasComplementOf(f formula.Formula) bool {
+	switch f.Class() {
+	case formula.LiteralClass:
+		return s.literals.HasComplementaryOf(f)
+	case formula.Alpha:
+		return s.betaFormulas.HasComplementaryOf(f)
+	case formula.Beta:
+		return s.alphaFormulas.HasComplementaryOf(f)
+	}
+	return false
+}
+
 // addOne add an element to the set. If the element is already contained, it will be overwritten.
 // If f is nil, it will not be added.
 // Returns 1 if this set contains the complement of f, 0 otherwise.

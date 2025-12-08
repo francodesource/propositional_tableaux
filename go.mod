@@ -1,5 +1,3 @@
 module propositional_tableaux
 
-go 1.25.4
-
-require github.com/sanity-io/litter v1.5.8
+go 1.23.5
