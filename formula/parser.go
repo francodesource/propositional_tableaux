@@ -48,7 +48,7 @@ func (f *formulaListener) ExitBinary(ctx *parser.BinaryContext) {
 	f.stack = append(f.stack, formula)
 }
 
-func ParseFormula(input string) Formula {
+func Parse(input string) Formula {
 	is := antlr.NewInputStream(input)
 	lexer := parser.NewFormulaLexer(is)
 	stream := antlr.NewCommonTokenStream(lexer, antlr.TokenDefaultChannel)
