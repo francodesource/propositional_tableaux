@@ -105,16 +105,16 @@ func (a Assignment) IsSupersetOf(b Assignment) bool {
 func CleanAssignments(assignments []Assignment) []Assignment {
 	var res []Assignment
 
-	for i, a := range assignments {
-		isSubset := false
-		for j, b := range assignments {
-			if i != j && b.IsSupersetOf(a) {
-				isSubset = true
+	for _, a1 := range assignments {
+		isSuperSetOfAny := false
+		for _, a2 := range res {
+			if a1.IsSupersetOf(a2) {
+				isSuperSetOfAny = true
 				break
 			}
 		}
-		if !isSubset {
-			res = append(res, a)
+		if !isSuperSetOfAny {
+			res = append(res, a1)
 		}
 	}
 	return res

@@ -231,7 +231,7 @@ func Complement(formula Formula) Formula {
 
 // GenerateRandom generates a random formula of the given size.
 func GenerateRandom(rand *rand.Rand, size int) Formula {
-	if size == 0 {
+	if size <= 0 {
 		letters := "pqrstuvwxyz"
 		randLetter := letters[rand.Intn(len(letters))]
 		return NewLetter(string(randLetter))
@@ -242,7 +242,7 @@ func GenerateRandom(rand *rand.Rand, size int) Formula {
 	if negation {
 		return NewNot(GenerateRandom(rand, size-1))
 	} else {
-		return NewBinary(GenerateRandom(rand, size-1), GenerateRandom(rand, size-1),
+		return NewBinary(GenerateRandom(rand, size/2), GenerateRandom(rand, size/2),
 			Operator(rand.Intn(7))) // random binary operation
 	}
 }

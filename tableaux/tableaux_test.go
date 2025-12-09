@@ -276,12 +276,17 @@ func TestBuildSemanticTableaux3(t *testing.T) {
 		tab := BuildSemanticTableaux(f)
 		tabSat := len(tab.Eval()) > 0
 
-		return bfSat == tabSat
+		res := bfSat == tabSat
+
+		if !res {
+			fmt.Printf("failed for formula %v: truth-table = %v, tableaux = %v\n", f, bfSat, tabSat)
+		}
+
+		return res
 	}
 
-	maxSize := 10 // this is reasonable
+	maxSize := 50
 	config := &quick.Config{
-		MaxCount: 10,
 		Values: func(values []reflect.Value, r *rand.Rand) {
 			values[0] = reflect.ValueOf(formula.GenerateRandom(r, r.Intn(maxSize)))
 		},
@@ -308,10 +313,9 @@ func TestBuildSemanticTableaux4(t *testing.T) {
 		return true
 	}
 
-	maxSize := 10
+	maxSize := 50
 
 	config := &quick.Config{
-		MaxCount: 20,
 		Values: func(values []reflect.Value, r *rand.Rand) {
 			values[0] = reflect.ValueOf(formula.GenerateRandom(r, r.Intn(maxSize)))
 		},
@@ -354,12 +358,10 @@ func TestBuildAnalyticTableaux(t *testing.T) {
 		}
 		return res
 	}
-	maxSize := 10
-	config := &quick.Config{
-		MaxCount: 20,
-		Values: func(values []reflect.Value, r *rand.Rand) {
-			values[0] = reflect.ValueOf(formula.GenerateRandom(r, r.Intn(maxSize)))
-		},
+	maxSize := 50
+	config := &quick.Config{Values: func(values []reflect.Value, r *rand.Rand) {
+		values[0] = reflect.ValueOf(formula.GenerateRandom(r, r.Intn(maxSize)))
+	},
 	}
 
 	if err := quick.Check(f, config); err != nil {
@@ -383,10 +385,9 @@ func TestBuildAnalyticTableaux2(t *testing.T) {
 		return true
 	}
 
-	maxSize := 10
+	maxSize := 50
 
 	config := &quick.Config{
-		MaxCount: 20,
 		Values: func(values []reflect.Value, r *rand.Rand) {
 			values[0] = reflect.ValueOf(formula.GenerateRandom(r, r.Intn(maxSize)))
 		},

@@ -154,9 +154,8 @@ func TestBuildBufferedTableaux(t *testing.T) {
 		}
 		return res
 	}
-	maxSize := 10
+	maxSize := 50
 	config := &quick.Config{
-		MaxCount: 30,
 		Values: func(values []reflect.Value, r *rand.Rand) {
 			values[0] = reflect.ValueOf(formula.GenerateRandom(r, r.Intn(maxSize)))
 		},
@@ -199,9 +198,8 @@ func TestBuildBufferedTableaux2(t *testing.T) {
 		}
 		return res
 	}
-	maxSize := 10
+	maxSize := 50
 	config := &quick.Config{
-		MaxCount: 20,
 		Values: func(values []reflect.Value, r *rand.Rand) {
 			values[0] = reflect.ValueOf(formula.GenerateRandom(r, r.Intn(maxSize)))
 		},
