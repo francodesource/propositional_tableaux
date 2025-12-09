@@ -268,23 +268,6 @@ func bruteForceSat(f formula.Formula) bool {
 	return sat
 }
 
-func generateFormula(rand *rand.Rand, size int) formula.Formula {
-	if size == 0 {
-		letters := "pqrstuvwxyz"
-		randLetter := letters[rand.Intn(len(letters))]
-		return formula.NewLetter(string(randLetter))
-	}
-
-	negation := rand.Intn(2) == 1
-
-	if negation {
-		return formula.NewNot(generateFormula(rand, size-1))
-	} else {
-		return formula.NewBinary(generateFormula(rand, size-1), generateFormula(rand, size-1),
-			formula.Operator(rand.Intn(7))) // random binary operation
-	}
-}
-
 // TestBuildSemanticTableaux3 checks that the assignments discovered by the semantic tableaux are the same as
 // the one obtained by calculating all the truth-tables
 func TestBuildSemanticTableaux3(t *testing.T) {
@@ -300,7 +283,7 @@ func TestBuildSemanticTableaux3(t *testing.T) {
 	config := &quick.Config{
 		MaxCount: 10,
 		Values: func(values []reflect.Value, r *rand.Rand) {
-			values[0] = reflect.ValueOf(generateFormula(r, r.Intn(maxSize)))
+			values[0] = reflect.ValueOf(formula.GenerateRandom(r, r.Intn(maxSize)))
 		},
 	}
 
@@ -330,7 +313,7 @@ func TestBuildSemanticTableaux4(t *testing.T) {
 	config := &quick.Config{
 		MaxCount: 20,
 		Values: func(values []reflect.Value, r *rand.Rand) {
-			values[0] = reflect.ValueOf(generateFormula(r, r.Intn(maxSize)))
+			values[0] = reflect.ValueOf(formula.GenerateRandom(r, r.Intn(maxSize)))
 		},
 	}
 
@@ -375,7 +358,7 @@ func TestBuildAnalyticTableaux(t *testing.T) {
 	config := &quick.Config{
 		MaxCount: 20,
 		Values: func(values []reflect.Value, r *rand.Rand) {
-			values[0] = reflect.ValueOf(generateFormula(r, r.Intn(maxSize)))
+			values[0] = reflect.ValueOf(formula.GenerateRandom(r, r.Intn(maxSize)))
 		},
 	}
 
@@ -405,7 +388,7 @@ func TestBuildAnalyticTableaux2(t *testing.T) {
 	config := &quick.Config{
 		MaxCount: 20,
 		Values: func(values []reflect.Value, r *rand.Rand) {
-			values[0] = reflect.ValueOf(generateFormula(r, r.Intn(maxSize)))
+			values[0] = reflect.ValueOf(formula.GenerateRandom(r, r.Intn(maxSize)))
 		},
 	}
 

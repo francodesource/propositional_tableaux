@@ -1,6 +1,9 @@
 package formula
 
-import "fmt"
+import (
+	"fmt"
+	"math/rand"
+)
 
 type Classification int
 
@@ -223,5 +226,23 @@ func Complement(formula Formula) Formula {
 		return not.Negated()
 	} else {
 		return NewNot(formula)
+	}
+}
+
+// GenerateRandom generates a random formula of the given size.
+func GenerateRandom(rand *rand.Rand, size int) Formula {
+	if size == 0 {
+		letters := "pqrstuvwxyz"
+		randLetter := letters[rand.Intn(len(letters))]
+		return NewLetter(string(randLetter))
+	}
+
+	negation := rand.Intn(2) == 1
+
+	if negation {
+		return NewNot(GenerateRandom(rand, size-1))
+	} else {
+		return NewBinary(GenerateRandom(rand, size-1), GenerateRandom(rand, size-1),
+			Operator(rand.Intn(7))) // random binary operation
 	}
 }
