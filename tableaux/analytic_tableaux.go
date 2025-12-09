@@ -1,6 +1,7 @@
 package tableaux
 
 import (
+	"iter"
 	"maps"
 	"propositional_tableaux/formula"
 	"propositional_tableaux/tableaux/tsets"
@@ -10,6 +11,31 @@ type AnalyticNode struct {
 	formulas            tsets.TSet
 	left, right, father *AnalyticNode
 	mark                Mark
+}
+
+func (a *AnalyticNode) Father() *AnalyticNode {
+	if a.father == nil {
+		return nil
+	}
+	return a.father
+}
+
+func (a *AnalyticNode) Left() Node {
+	if a.left == nil {
+		return nil
+	}
+	return a.left
+}
+
+func (a *AnalyticNode) Right() Node {
+	if a.right == nil {
+		return nil
+	}
+	return a.right
+}
+
+func (a *AnalyticNode) Formulas() iter.Seq[formula.Formula] {
+	return combineIterators(a.formulas.IterLiterals(), a.formulas.IterAlpha(), a.formulas.IterBeta())
 }
 
 func (a *AnalyticNode) BranchHasComplementPairOf(fs ...formula.Formula) bool {

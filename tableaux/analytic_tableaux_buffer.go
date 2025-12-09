@@ -2,8 +2,10 @@ package tableaux
 
 import (
 	"fmt"
+	"iter"
 	"maps"
 	"propositional_tableaux/formula"
+	"slices"
 	"strings"
 )
 
@@ -73,6 +75,31 @@ type BufferedNode struct {
 	formulas            BufferSet
 	left, right, father *BufferedNode
 	mark                Mark
+}
+
+func (b *BufferedNode) Father() *BufferedNode {
+	if b.father == nil {
+		return nil
+	}
+	return b.father
+}
+
+func (b *BufferedNode) Left() Node {
+	if b.left == nil {
+		return nil
+	}
+	return b.left
+}
+
+func (b *BufferedNode) Right() Node {
+	if b.right == nil {
+		return nil
+	}
+	return b.right
+}
+
+func (b *BufferedNode) Formulas() iter.Seq[formula.Formula] {
+	return slices.Values(b.formulas)
 }
 
 func (b *BufferedNode) BranchHasComplementPairOf(fs ...formula.Formula) bool {

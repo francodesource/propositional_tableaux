@@ -1,6 +1,8 @@
 package tableaux
 
 import (
+	"github.com/m1gwings/treedrawer/tree"
+	"iter"
 	"propositional_tableaux/formula"
 	"propositional_tableaux/tableaux/tsets"
 	"strings"
@@ -27,10 +29,53 @@ func (m Mark) String() string {
 	}
 }
 
-type Node struct {
+type Node interface {
+	IsLeaf() bool
+	IsClosed() bool
+	IsOpen() bool
+	Left() Node
+	Right() Node
+	Formulas() iter.Seq[formula.Formula]
+}
+
+func combineIterators[T any](iters ...iter.Seq[T]) iter.Seq[T] {
+	return func(yield func(t T) bool) {
+		for _, it := range iters {
+			it(yield)
+		}
+	}
+}
+
+type SemanticNode struct {
 	formulas    tsets.TSet
-	left, right *Node
+	left, right *SemanticNode
 	mark        Mark
+}
+
+func (node *SemanticNode) IsClosed() bool {
+	return node.mark == Closed
+}
+
+func (node *SemanticNode) IsOpen() bool {
+	return node.mark == Open
+}
+
+func (node *SemanticNode) Left() Node {
+	if node.left == nil {
+		return nil
+	}
+	return node.left
+}
+
+func (node *SemanticNode) Right() Node {
+	if node.right == nil {
+		return nil
+	}
+	return node.right
+}
+
+func (node *SemanticNode) Formulas() iter.Seq[formula.Formula] {
+	return combineIterators(node.formulas.IterLiterals(), node.formulas.IterAlpha(), node.formulas.IterBeta())
 }
 
 func indentOf(s string, size int) string {
@@ -49,7 +94,7 @@ func indentOf(s string, size int) string {
 	return sb.String()
 }
 
-func (node *Node) String() string {
+func (node *SemanticNode) String() string {
 	var res string
 
 	res = "{\n  values: " + node.formulas.String()
@@ -69,11 +114,11 @@ func (node *Node) String() string {
 	return res
 }
 
-func (node *Node) IsLeaf() bool {
+func (node *SemanticNode) IsLeaf() bool {
 	return node.left == nil && node.right == nil
 }
 
-func (node *Node) Height() int {
+func (node *SemanticNode) Height() int {
 	if node == nil {
 		return 0
 	}
@@ -81,11 +126,11 @@ func (node *Node) Height() int {
 	return 1 + max(node.left.Height(), node.right.Height())
 }
 
-func (node *Node) MarkAsClosed() {
+func (node *SemanticNode) MarkAsClosed() {
 	node.mark = Closed
 }
 
-func (node *Node) MarkAsOpen() {
+func (node *SemanticNode) MarkAsOpen() {
 	node.mark = Open
 }
 
@@ -120,7 +165,7 @@ func CleanAssignments(assignments []Assignment) []Assignment {
 	return res
 }
 
-func eval(node *Node) []Assignment {
+func eval(node *SemanticNode) []Assignment {
 	if node.IsLeaf() {
 		if node.mark == Closed {
 			return []Assignment{}
@@ -153,11 +198,11 @@ func eval(node *Node) []Assignment {
 	return res
 }
 
-func (node *Node) Eval() []Assignment {
+func (node *SemanticNode) Eval() []Assignment {
 	return CleanAssignments(eval(node))
 }
 
-func buildSemanticTableaux(node *Node) {
+func buildSemanticTableaux(node *SemanticNode) {
 
 	if node.formulas.HasOnlyLiterals() && node.formulas.HasComplementaryLiterals() {
 		node.MarkAsClosed()
@@ -179,7 +224,7 @@ func buildSemanticTableaux(node *Node) {
 			newSet := tsets.RemoveAlpha(node.formulas, alpha)
 			hasComplement := newSet.Add(left, right)
 
-			node.left = &Node{
+			node.left = &SemanticNode{
 				formulas: newSet,
 			}
 
@@ -201,11 +246,11 @@ func buildSemanticTableaux(node *Node) {
 			rightSet := tsets.RemoveBeta(node.formulas, beta)
 			hasRightComplement := rightSet.Add(right)
 
-			node.left = &Node{
+			node.left = &SemanticNode{
 				formulas: leftSet,
 			}
 
-			node.right = &Node{
+			node.right = &SemanticNode{
 				formulas: rightSet,
 			}
 
@@ -226,8 +271,8 @@ func buildSemanticTableaux(node *Node) {
 	}
 }
 
-func BuildSemanticTableaux(f formula.Formula) *Node {
-	node := &Node{
+func BuildSemanticTableaux(f formula.Formula) *SemanticNode {
+	node := &SemanticNode{
 		formulas: tsets.NewTSet(),
 	}
 	node.formulas.Add(f)
