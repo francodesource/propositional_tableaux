@@ -397,3 +397,23 @@ func TestBuildAnalyticTableaux2(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+var bigFormula = formula.Parse("!((!!!(((!!s !| ((y ^ w) <-> !z)) <-> (((q -> x) | (z ^ q)) -> !(t ^ u))) <-> ((((s <-> w) <-> (t !| x)) -> !!p) !| (!(s ^ p) <-> (!w !& !u)))) !& !!!((!(!!u <-> (!q !| (x -> r))) -> !(!!v ^ !(y !& q))) & !!((((t <-> s) !| (s & s)) ^ (!z | !p)) !& !!!!x))) !& !!((!(((!t !| (q ^ y)) <-> !(u -> s)) & !!(!x !& (t & r))) !| !!(((!s | (v !& x)) & !(s -> q)) & (!!t !| ((w ^ t) ^ (w <-> w))))) !& !((!!!(!u <-> !u) ^ (!(t !& t) ^ ((x & v) & !r))) | (!!((q & q) <-> !p) <-> (!(t <-> w) | (!p & (u !| r)))))))")
+
+func BenchmarkBuildSemanticTableaux(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		BuildSemanticTableaux(bigFormula)
+	}
+}
+
+func BenchmarkBuildAnalyticTableaux(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		BuildAnalyticTableaux(bigFormula)
+	}
+}
+
+func BenchmarkBuildBufferedTableaux(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		BuildBufferedTableaux(bigFormula)
+	}
+}
