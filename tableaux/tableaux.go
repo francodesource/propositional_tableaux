@@ -93,6 +93,33 @@ func (node *Node) MarkAsOpen() {
 // it can be assigned either true beta_or false, as it does not affect the evaluation of the formulas.
 type Assignment map[string]bool
 
+func (a Assignment) IsSupersetOf(b Assignment) bool {
+	for k, v := range b {
+		if val, ok := a[k]; !ok || val != v {
+			return false
+		}
+	}
+	return true
+}
+
+func CleanAssignments(assignments []Assignment) []Assignment {
+	var res []Assignment
+
+	for i, a := range assignments {
+		isSubset := false
+		for j, b := range assignments {
+			if i != j && b.IsSupersetOf(a) {
+				isSubset = true
+				break
+			}
+		}
+		if !isSubset {
+			res = append(res, a)
+		}
+	}
+	return res
+}
+
 func eval(node *Node) []Assignment {
 	if node.IsLeaf() {
 		if node.mark == Closed {
@@ -127,7 +154,7 @@ func eval(node *Node) []Assignment {
 }
 
 func (node *Node) Eval() []Assignment {
-	return eval(node)
+	return CleanAssignments(eval(node))
 }
 
 func buildSemanticTableaux(node *Node) {

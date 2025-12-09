@@ -158,7 +158,7 @@ func (a *AnalyticNode) eval() []Assignment {
 }
 
 func (a *AnalyticNode) Eval() []Assignment {
-	return a.eval()
+	return CleanAssignments(a.eval())
 }
 
 func buildAnalyticTableaux(a *AnalyticNode, visited map[formula.Formula]bool) {

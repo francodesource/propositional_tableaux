@@ -204,7 +204,7 @@ func (b *BufferedNode) eval() []Assignment {
 }
 
 func (b *BufferedNode) Eval() []Assignment {
-	return b.eval()
+	return CleanAssignments(b.eval())
 }
 
 func buildBufferedTableaux(a *BufferedNode, visited map[formula.Formula]bool) {
