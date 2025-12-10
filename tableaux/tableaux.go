@@ -396,3 +396,83 @@ func UnicodeAsciiTree(tableaux Node) *tree.Tree {
 	}
 	return AsciiTree(tableaux, unicodeFormula, md)
 }
+
+var latexOperators = [7]string{
+	`\land`,
+	`\lor`,
+	`\to`,
+	`\uparrow`,
+	`\downarrow`,
+	`\biconditional`,
+	`\Oplus`,
+}
+
+func formulaTex(f formula.Formula) string {
+	switch f := f.(type) {
+	case formula.Letter:
+		return f.Name()
+	case formula.Not:
+		return `\neg ` + formulaTex(f.Negated())
+	case formula.Binary:
+		return fmt.Sprintf(`\left(%s %s %s\right)`,
+			formulaTex(f.Left()), latexOperators[f.Op()], formulaTex(f.Right()))
+	default:
+		panic(fmt.Errorf("%T is  not a formula", f))
+	}
+}
+
+func formulasTexString(fs iter.Seq[formula.Formula]) string {
+	sb := strings.Builder{}
+	first := true
+	for f := range fs {
+		if !first {
+			sb.WriteString(", ")
+		} else {
+			first = false
+		}
+		sb.WriteString(formulaTex(f))
+	}
+	return fmt.Sprintf(`{$\left\{%s\right\}$}`, sb.String())
+}
+func markTexString(open bool) string {
+	if open {
+		return `\odot`
+	}
+	return `\times`
+}
+
+func texForestTree(tableaux Node, il int) string {
+	const indentSize = 3
+	res := formulasTexString(tableaux.Formulas())
+	nlFlag := false
+	if tableaux.IsLeaf() {
+		return fmt.Sprintf(strings.Repeat(" ", (il)*indentSize)+"["+
+			`\shortstack{%s\\$%s$}`, res, markTexString(tableaux.IsOpen())) + "]"
+	} else {
+		res = strings.Repeat(" ", (il)*indentSize) + "[" + res
+	}
+
+	if tableaux.Left() != nil {
+		res += "\n" + strings.Repeat(" ", (il+1)*indentSize) + texForestTree(tableaux.Left(), il+1)
+		nlFlag = true
+	}
+
+	if tableaux.Right() != nil {
+		res += "\n" + strings.Repeat(" ", (il+1)*indentSize) + texForestTree(tableaux.Right(), il+1)
+		nlFlag = true
+	}
+	if nlFlag {
+		res += "\n" + strings.Repeat(" ", il*indentSize)
+	}
+	return res + "]"
+}
+
+func TexForestTree(tableaux Node) string {
+	t := texForestTree(tableaux, 0)
+	format := fmt.Sprintf(`
+\begin{forest}
+%s
+\end{forest}`, t)
+
+	return format
+}
