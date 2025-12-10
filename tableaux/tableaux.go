@@ -1,6 +1,7 @@
 package tableaux
 
 import (
+	"fmt"
 	"github.com/m1gwings/treedrawer/tree"
 	"iter"
 	"propositional_tableaux/formula"
@@ -279,4 +280,119 @@ func BuildSemanticTableaux(f formula.Formula) *SemanticNode {
 	buildSemanticTableaux(node)
 
 	return node
+}
+
+type FormulaDrawer func(f formula.Formula) string
+type MarkDrawer func(open bool) string
+
+func formulasString(fs iter.Seq[formula.Formula], fd FormulaDrawer) string {
+	var sb strings.Builder
+	sb.WriteString("{")
+	first := true
+	for f := range fs {
+		if !first {
+			sb.WriteString(", ")
+		}
+		sb.WriteString(fd(f))
+		first = false
+	}
+	sb.WriteString("}")
+	return sb.String()
+}
+
+func centerWRT(s string, wrt int) string {
+	return strings.Repeat(" ", wrt/2-len(s)/2) + s
+}
+
+func asciiTree(tableaux Node, t *tree.Tree, fd FormulaDrawer, md MarkDrawer) {
+	if tableaux == nil {
+		return
+	}
+	value := formulasString(tableaux.Formulas(), fd)
+
+	if tableaux.IsLeaf() {
+		value += "\n" + strings.Repeat("-", len(value)) + "\n" + centerWRT(md(tableaux.IsOpen()), len(value))
+	}
+
+	t.SetVal(tree.NodeString(value))
+
+	if tableaux.Left() != nil {
+		left := t.AddChild(tree.NodeString(""))
+		asciiTree(tableaux.Left(), left, fd, md)
+	}
+
+	if tableaux.Right() != nil {
+		right := t.AddChild(tree.NodeString(""))
+		asciiTree(tableaux.Right(), right, fd, md)
+	}
+}
+
+// AsciiTree return an ASCII art representation of the tableaux where the formulas and the marks are printed according
+// to their printing function FormulaDrawer and MarkDrawer.
+func AsciiTree(tableaux Node, fd FormulaDrawer, md MarkDrawer) *tree.Tree {
+	res := tree.NewTree(tree.NodeString(""))
+	asciiTree(tableaux, res, fd, md)
+	return res
+}
+
+// DefaultAsciiTree return an ASCII art representation of the tableaux where everything is represented as an ascii character.
+func DefaultAsciiTree(tableaux Node) *tree.Tree {
+	fd := func(f formula.Formula) string {
+		return f.String()
+	}
+
+	md := func(open bool) string {
+		if open {
+			return "OPEN"
+		}
+		return "CLOSE"
+	}
+
+	return AsciiTree(tableaux, fd, md)
+}
+
+func unicodeOperator(op formula.Operator) string {
+	switch op {
+	case formula.And:
+		return "∧"
+	case formula.Or:
+		return "∨"
+	case formula.Implies:
+		return "→"
+	case formula.Nand:
+		return "↑"
+	case formula.Nor:
+		return "↓"
+	case formula.Biconditional:
+		return "↔"
+	case formula.Xor:
+		return "⊕"
+	default:
+		panic("unknown operator")
+	}
+}
+func unicodeFormula(f formula.Formula) string {
+	switch f := f.(type) {
+	case formula.Letter:
+		return f.Name()
+	case formula.Not:
+		return "¬" + unicodeFormula(f.Negated())
+	case formula.Binary:
+		return fmt.Sprintf("(%s %s %s)",
+			unicodeFormula(f.Left()), unicodeOperator(f.Op()), unicodeFormula(f.Right()))
+	default:
+		panic(fmt.Errorf("%T is not a formula", f))
+	}
+}
+
+// UnicodeAsciiTree returns an ascii art representation of the tableaux where the formulas and the marks are represented
+// using Unicode characters. A closed leaf is a filled circle, an open leaf is an empty circle.
+func UnicodeAsciiTree(tableaux Node) *tree.Tree {
+	md := func(open bool) string {
+		if open {
+			return "○"
+		}
+		return "●"
+	}
+	return AsciiTree(tableaux, unicodeFormula, md)
 }
