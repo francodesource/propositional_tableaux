@@ -47,7 +47,7 @@ func checkInput(flag string) (io.ReadCloser, error) {
 
 func checkOutput(flag string) (io.WriteCloser, error) {
 	if flag == "stdout" {
-		return os.Stdout, nil
+		return nopWriteCloser{os.Stdout}, nil
 	}
 
 	if _, err := os.Stat(flag); errors.Is(err, os.ErrNotExist) {
