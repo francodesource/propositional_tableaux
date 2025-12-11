@@ -14,6 +14,7 @@ type TSet struct {
 	betaFormulas  fsets.FormulaSet
 }
 
+// NewTSet creates and returns a new empty TSet.
 func NewTSet() TSet {
 	return TSet{
 		literals:      fsets.New(),
@@ -30,6 +31,7 @@ func asByte(b bool) byte {
 	return 0
 }
 
+// HasComplementOf returns true if the set contains the complement of the given formula f.
 func (s TSet) HasComplementOf(f formula.Formula) bool {
 	switch f.Class() {
 	case formula.LiteralClass:
@@ -75,18 +77,22 @@ func (s TSet) Add(fs ...formula.Formula) bool {
 	return flag == 1
 }
 
+// Len returns the total number of elements in the set.
 func (s TSet) Len() int {
 	return s.literals.Len() + s.alphaFormulas.Len() + s.betaFormulas.Len()
 }
 
+// IsEmpty returns true if the set is empty, false otherwise.
 func (s TSet) IsEmpty() bool {
 	return s.Len() == 0
 }
 
+// HasOnlyLiterals returns true if the set contains only literals, false otherwise.
 func (s TSet) HasOnlyLiterals() bool {
 	return s.literals.Len() > 0 && s.alphaFormulas.Len() == 0 && s.betaFormulas.Len() == 0
 }
 
+// HasComplementaryLiterals returns true if the set contains at least a pair of complementary literals, false otherwise.
 func (s TSet) HasComplementaryLiterals() bool {
 	for literal := range s.literals.Iter() {
 		if s.literals.HasComplementaryOf(literal) {
@@ -96,22 +102,27 @@ func (s TSet) HasComplementaryLiterals() bool {
 	return false
 }
 
+// HasAlpha returns true if the set contains at least one alpha formula, false otherwise.
 func (s TSet) HasAlpha() bool {
 	return s.alphaFormulas.Len() > 0
 }
 
+// HasBeta returns true if the set contains at least one beta formula, false otherwise.
 func (s TSet) HasBeta() bool {
 	return s.betaFormulas.Len() > 0
 }
 
+// IterLiterals returns an iterator over the literals in the set.
 func (s TSet) IterLiterals() iter.Seq[formula.Formula] {
 	return s.literals.Iter()
 }
 
+// IterAlpha returns an iterator over the alpha formulas in the set.
 func (s TSet) IterAlpha() iter.Seq[formula.Formula] {
 	return s.alphaFormulas.Iter()
 }
 
+// IterBeta returns an iterator over the beta formulas in the set.
 func (s TSet) IterBeta() iter.Seq[formula.Formula] {
 	return s.betaFormulas.Iter()
 }
@@ -121,6 +132,7 @@ func (s TSet) String() string {
 		s.literals.String(), s.alphaFormulas.String(), s.betaFormulas.String())
 }
 
+// RemoveAlpha returns a copy of the given set without the given alpha formula.
 func RemoveAlpha(set TSet, f formula.Formula) TSet {
 	alphaSet := fsets.Remove(set.alphaFormulas, f)
 	return TSet{
@@ -130,6 +142,7 @@ func RemoveAlpha(set TSet, f formula.Formula) TSet {
 	}
 }
 
+// RemoveBeta returns a copy of the given set without the given beta formula.
 func RemoveBeta(set TSet, f formula.Formula) TSet {
 	betaSet := fsets.Remove(set.betaFormulas, f)
 	return TSet{
