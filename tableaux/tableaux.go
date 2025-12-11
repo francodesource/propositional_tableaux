@@ -301,7 +301,7 @@ func formulasString(fs iter.Seq[formula.Formula], fd FormulaDrawer) string {
 }
 
 func centerWRT(s string, wrt int) string {
-	return strings.Repeat(" ", wrt/2-len(s)/2) + s
+	return strings.Repeat(" ", wrt/2-len(s)/2+1) + s
 }
 
 func asciiTree(tableaux Node, t *tree.Tree, fd FormulaDrawer, md MarkDrawer) {
@@ -309,9 +309,10 @@ func asciiTree(tableaux Node, t *tree.Tree, fd FormulaDrawer, md MarkDrawer) {
 		return
 	}
 	value := formulasString(tableaux.Formulas(), fd)
-
+	lenValue := len([]rune(value)) // using this to have correct size of Unicode strings
+	// Adding a separator
 	if tableaux.IsLeaf() {
-		value += "\n" + strings.Repeat("-", len(value)) + "\n" + centerWRT(md(tableaux.IsOpen()), len(value))
+		value += "\n" + strings.Repeat("-", lenValue) + "\n" + centerWRT(md(tableaux.IsOpen()), lenValue)
 	}
 
 	t.SetVal(tree.NodeString(value))
@@ -403,8 +404,8 @@ var latexOperators = [7]string{
 	`\to`,
 	`\uparrow`,
 	`\downarrow`,
-	`\biconditional`,
-	`\Oplus`,
+	`\leftrightarrow`,
+	`\oplus`,
 }
 
 func formulaTex(f formula.Formula) string {
@@ -471,6 +472,9 @@ func TexForestTree(tableaux Node) string {
 	t := texForestTree(tableaux, 0)
 	format := fmt.Sprintf(`
 \begin{forest}
+	for tree={
+		anchor=north   
+	}
 %s
 \end{forest}`, t)
 

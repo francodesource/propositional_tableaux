@@ -99,7 +99,15 @@ func (b *BufferedNode) Right() Node {
 }
 
 func (b *BufferedNode) Formulas() iter.Seq[formula.Formula] {
-	return slices.Values(b.formulas)
+	res := make([]formula.Formula, 0, 2)
+
+	for _, f := range b.formulas {
+		if f != nil {
+			res = append(res, f)
+		}
+	}
+
+	return slices.Values(res)
 }
 
 func (b *BufferedNode) BranchHasComplementPairOf(fs ...formula.Formula) bool {

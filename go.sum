@@ -1,0 +1,6 @@
+github.com/antlr4-go/antlr/v4 v4.13.1 h1:SqQKkuVZ+zWkMMNkjy5FZe5mr5WURWnlpmOuzYWrPrQ=
+github.com/antlr4-go/antlr/v4 v4.13.1/go.mod h1:GKmUxMtwp6ZgGwZSva4eWPC5mS6vUAmOABFgjdkM7Nw=
+github.com/m1gwings/treedrawer v0.3.3-beta h1:VeeQ4I90+NL0G2Tga3H4EY4hbOyVP3ID4T93r21oLbQ=
+github.com/m1gwings/treedrawer v0.3.3-beta/go.mod h1:Sebh5tCtjQWAG/B9xWct163vB9pCbBcA1ykaUErDUTY=
+golang.org/x/exp v0.0.0-20240506185415-9bf2ced13842 h1:vr/HnozRka3pE4EsMEg1lgkXJkTFJCVUX+S/ZT6wYzM=
+golang.org/x/exp v0.0.0-20240506185415-9bf2ced13842/go.mod h1:XtvwrStGgqGPLc4cjQfWqZHG1YFdYs6swckp8vpsjnc=
