@@ -7,12 +7,14 @@ import (
 	"propositional_tableaux/tableaux/tsets"
 )
 
+// AnalyticNode represents a node in an analytic tableaux.
 type AnalyticNode struct {
 	formulas            tsets.TSet
 	left, right, father *AnalyticNode
 	mark                Mark
 }
 
+// Father returns the father node of the current node. Returns nil if the node is root.
 func (a *AnalyticNode) Father() *AnalyticNode {
 	if a.father == nil {
 		return nil
@@ -20,6 +22,7 @@ func (a *AnalyticNode) Father() *AnalyticNode {
 	return a.father
 }
 
+// Left returns the left child node of the current node. Returns nil if no left child exists.
 func (a *AnalyticNode) Left() Node {
 	if a.left == nil {
 		return nil
@@ -27,6 +30,7 @@ func (a *AnalyticNode) Left() Node {
 	return a.left
 }
 
+// Right returns the right child node of the current node. Returns nil if no right child exists.
 func (a *AnalyticNode) Right() Node {
 	if a.right == nil {
 		return nil
@@ -34,10 +38,12 @@ func (a *AnalyticNode) Right() Node {
 	return a.right
 }
 
+// Formulas returns an iterator over all formulas contained in the current node.
 func (a *AnalyticNode) Formulas() iter.Seq[formula.Formula] {
 	return combineIterators(a.formulas.IterLiterals(), a.formulas.IterAlpha(), a.formulas.IterBeta())
 }
 
+// BranchHasComplementPairOf checks if the current node branch has a complement pair of any of the given formulas.
 func (a *AnalyticNode) BranchHasComplementPairOf(fs ...formula.Formula) bool {
 	for _, f := range fs {
 		if f != nil && a.formulas.HasComplementOf(f) {
@@ -52,6 +58,7 @@ func (a *AnalyticNode) BranchHasComplementPairOf(fs ...formula.Formula) bool {
 	return false
 }
 
+// BranchHasComplementaryLiterals checks if the current node branch has complementary literals.
 func (a *AnalyticNode) BranchHasComplementaryLiterals() bool {
 	if a.formulas.HasComplementaryLiterals() {
 		return true
@@ -64,10 +71,12 @@ func (a *AnalyticNode) BranchHasComplementaryLiterals() bool {
 	return false
 }
 
+// MarkAsClosed marks the current node as closed.
 func (a *AnalyticNode) MarkAsClosed() {
 	a.mark = Closed
 }
 
+// MarkAsOpen marks the current node as open.
 func (a *AnalyticNode) MarkAsOpen() {
 	a.mark = Open
 }
@@ -124,14 +133,17 @@ func (a *AnalyticNode) ChooseBetaFormula(visited map[formula.Formula]bool) (res 
 	return
 }
 
+// IsLeaf checks if the current node is a leaf.
 func (a *AnalyticNode) IsLeaf() bool {
 	return a.left == nil && a.right == nil
 }
 
+// IsClosed checks if the current node is marked as closed.
 func (a *AnalyticNode) IsClosed() bool {
 	return a.IsLeaf() && a.mark == Closed
 }
 
+// IsOpen checks if the current node is marked as open.
 func (a *AnalyticNode) IsOpen() bool {
 	return a.IsLeaf() && a.mark == Open
 }
@@ -143,6 +155,7 @@ func assignLiteral(literal formula.Literal) bool {
 	return true
 }
 
+// collectLiterals collects all literals from the current node branch into the given map.
 func (a *AnalyticNode) collectLiterals(literals map[formula.Literal]bool) {
 	for literal := range a.formulas.IterLiterals() {
 		literals[formula.AsLiteral(literal)] = true
@@ -183,6 +196,7 @@ func (a *AnalyticNode) eval() []Assignment {
 	return res
 }
 
+// Eval evaluates the analytic tableaux and returns all satisfying assignments cleaned of redundant assignments.
 func (a *AnalyticNode) Eval() []Assignment {
 	return CleanAssignments(a.eval())
 }
@@ -250,6 +264,7 @@ func buildAnalyticTableaux(a *AnalyticNode, visited map[formula.Formula]bool) {
 
 }
 
+// BuildAnalyticTableaux builds an analytic tableaux for the given formula and returns the root node.
 func BuildAnalyticTableaux(f formula.Formula) *AnalyticNode {
 	set := tsets.NewTSet()
 	set.Add(f)
