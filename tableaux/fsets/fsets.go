@@ -7,10 +7,12 @@ import (
 	"strings"
 )
 
+// FormulaSet is a set of formulas without duplicate.
 type FormulaSet struct {
 	values map[formula.Formula]struct{}
 }
 
+// New creates a new FormulaSet containing the given formulas.
 func New(formulas ...formula.Formula) FormulaSet {
 	values := make(map[formula.Formula]struct{}, len(formulas))
 
@@ -30,15 +32,18 @@ func (s FormulaSet) String() string {
 	return "{" + strings.Join(strs, ", ") + "}"
 }
 
+// Has returns true if the formula f is contained in the set.
 func (s FormulaSet) Has(f formula.Formula) bool {
 	_, ok := s.values[f]
 	return ok
 }
 
+// HasComplementaryOf returns true if the complement of the given literal is contained in the set.
 func (s FormulaSet) HasComplementaryOf(literal formula.Formula) bool {
 	return s.Has(formula.Complement(literal))
 }
 
+// Iter returns an iterator over the formulas in the set.
 func (s FormulaSet) Iter() iter.Seq[formula.Formula] {
 	return maps.Keys(s.values)
 }
@@ -55,6 +60,7 @@ func (s FormulaSet) Add(formulas ...formula.Formula) FormulaSet {
 	return s
 }
 
+// Len returns the number of formulas in the set.
 func (s FormulaSet) Len() int {
 	return len(s.values)
 }
@@ -67,6 +73,7 @@ func Remove(s FormulaSet, value formula.Formula) FormulaSet {
 	return FormulaSet{res}
 }
 
+// Clone returns a copy of the given FormulaSet.
 func Clone(s FormulaSet) FormulaSet {
 	return FormulaSet{maps.Clone(s.values)}
 }
