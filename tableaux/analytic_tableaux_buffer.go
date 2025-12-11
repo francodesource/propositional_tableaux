@@ -12,6 +12,8 @@ import (
 // BufferSet is a buffer of two different formulas
 type BufferSet []formula.Formula
 
+// NewBufferSet creates a new BufferSet containing the given formulas.
+// Panics if more than two different formulas are given.
 func NewBufferSet(fs ...formula.Formula) BufferSet {
 	res := make(BufferSet, 2)
 
@@ -35,6 +37,9 @@ func (b BufferSet) String() string {
 	return "{" + strings.Join(strs, ", ") + "}"
 }
 
+// Add adds a formula to the BufferSet.
+// Panics if more than two different formulas are added.
+// If the formula is already contained it will not be added.
 func (b BufferSet) Add(f formula.Formula) {
 	if b[0] == nil {
 		b[0] = f
@@ -57,10 +62,12 @@ func (b BufferSet) Add(f formula.Formula) {
 	panic(fmt.Errorf("BufferSet can't contain more than two values: can't add %v to %v", b, f))
 }
 
+// Has returns true if the formula f is contained in the BufferSet.
 func (b BufferSet) Has(f formula.Formula) bool {
 	return b[0] == f || b[1] == f
 }
 
+// HasComplementOf returns true if the BufferSet contains the complement of at least one of the given formulas.
 func (b BufferSet) HasComplementOf(fs ...formula.Formula) bool {
 	for _, f := range fs {
 		if b.Has(formula.Complement(f)) {
@@ -71,12 +78,14 @@ func (b BufferSet) HasComplementOf(fs ...formula.Formula) bool {
 	return false
 }
 
+// BufferedNode is a node in a buffered analytic tableaux.
 type BufferedNode struct {
 	formulas            BufferSet
 	left, right, father *BufferedNode
 	mark                Mark
 }
 
+// Father returns the father node of the current node. Returns nil if the node is root.
 func (b *BufferedNode) Father() *BufferedNode {
 	if b.father == nil {
 		return nil
@@ -84,6 +93,7 @@ func (b *BufferedNode) Father() *BufferedNode {
 	return b.father
 }
 
+// Left returns the left child node of the current node. Returns nil if no left child exists.
 func (b *BufferedNode) Left() Node {
 	if b.left == nil {
 		return nil
@@ -91,6 +101,7 @@ func (b *BufferedNode) Left() Node {
 	return b.left
 }
 
+// Right returns the right child node of the current node. Returns nil if no right child exists.
 func (b *BufferedNode) Right() Node {
 	if b.right == nil {
 		return nil
@@ -98,6 +109,7 @@ func (b *BufferedNode) Right() Node {
 	return b.right
 }
 
+// Formulas returns an iterator over all formulas contained in the current node, filtered of nil values.
 func (b *BufferedNode) Formulas() iter.Seq[formula.Formula] {
 	res := make([]formula.Formula, 0, 2)
 
@@ -110,6 +122,7 @@ func (b *BufferedNode) Formulas() iter.Seq[formula.Formula] {
 	return slices.Values(res)
 }
 
+// BranchHasComplementPairOf checks if the current node branch has a complement pair of at least one of the given formulas.
 func (b *BufferedNode) BranchHasComplementPairOf(fs ...formula.Formula) bool {
 	for _, f := range fs {
 		if f != nil && b.formulas.HasComplementOf(f) {
@@ -156,22 +169,27 @@ func (b *BufferedNode) ChooseBetaFormula(visited map[formula.Formula]bool) (res 
 	return
 }
 
+// MarkAsClosed marks the current node as closed.
 func (b *BufferedNode) MarkAsClosed() {
 	b.mark = Closed
 }
 
+// MarkAsOpen marks the current node as open.
 func (b *BufferedNode) MarkAsOpen() {
 	b.mark = Open
 }
 
+// IsLeaf returns true if the current node is a leaf (i.e., has no children).
 func (b *BufferedNode) IsLeaf() bool {
 	return b.left == nil && b.right == nil
 }
 
+// IsClosed returns true if the current node is a closed leaf.
 func (b *BufferedNode) IsClosed() bool {
 	return b.IsLeaf() && b.mark == Closed
 }
 
+// IsOpen returns true if the current node is an open leaf.
 func (b *BufferedNode) IsOpen() bool {
 	return b.IsLeaf() && b.mark == Open
 }
@@ -238,6 +256,7 @@ func (b *BufferedNode) eval() []Assignment {
 	return res
 }
 
+// Eval evaluates the buffered tableaux and returns all satisfying assignments cleaned of the redundant assignments.
 func (b *BufferedNode) Eval() []Assignment {
 	return CleanAssignments(b.eval())
 }
@@ -302,6 +321,7 @@ func buildBufferedTableaux(a *BufferedNode, visited map[formula.Formula]bool) {
 
 }
 
+// BuildBufferedTableaux builds a buffered analytic tableaux for the given formula.
 func BuildBufferedTableaux(f formula.Formula) *BufferedNode {
 	set := NewBufferSet(f)
 
