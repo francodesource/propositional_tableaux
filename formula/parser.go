@@ -48,6 +48,20 @@ func (f *formulaListener) ExitBinary(ctx *parser.BinaryContext) {
 	f.stack = append(f.stack, formula)
 }
 
+// Parse takes a string input representing a propositional logic formula
+// and returns its corresponding Formula representation.
+// The operators supported are:
+//   - AND: &
+//   - OR: |
+//   - NOT: !
+//   - IMPLIES: ->
+//   - BICONDITIONAL: <->
+//   - NAND: !&
+//   - NOR: !|
+//   - XOR: ^
+//
+// Binary operations must always be enclosed in parentheses.
+// Redundant parentheses are not allowed.
 func Parse(input string) Formula {
 	is := antlr.NewInputStream(input)
 	lexer := parser.NewFormulaLexer(is)
