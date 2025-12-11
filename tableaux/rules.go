@@ -5,6 +5,7 @@ import (
 	"propositional_tableaux/formula"
 )
 
+// Rule represent a rule of the tableaux calculus that takes two formulas and returns two formulas.
 type Rule func(left, right formula.Formula) (formula.Formula, formula.Formula)
 
 func and(left, right formula.Formula) (formula.Formula, formula.Formula) {
