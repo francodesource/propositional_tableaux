@@ -9,6 +9,7 @@ import (
 	"strings"
 )
 
+// Mark represents the mark of a tableaux node. It can be Unmarked, Closed or Open.
 type Mark byte
 
 const (
@@ -30,6 +31,7 @@ func (m Mark) String() string {
 	}
 }
 
+// Node represents a node in a tableaux.
 type Node interface {
 	IsLeaf() bool
 	IsClosed() bool
@@ -47,20 +49,24 @@ func combineIterators[T any](iters ...iter.Seq[T]) iter.Seq[T] {
 	}
 }
 
+// SemanticNode represents a node in a semantic tableaux.
 type SemanticNode struct {
 	formulas    tsets.TSet
 	left, right *SemanticNode
 	mark        Mark
 }
 
+// IsClosed returns true if the node is marked as closed.
 func (node *SemanticNode) IsClosed() bool {
 	return node.mark == Closed
 }
 
+// IsOpen returns true if the node is marked as open.
 func (node *SemanticNode) IsOpen() bool {
 	return node.mark == Open
 }
 
+// Left returns the left child node. Returns nil if no left child exists.
 func (node *SemanticNode) Left() Node {
 	if node.left == nil {
 		return nil
@@ -68,6 +74,7 @@ func (node *SemanticNode) Left() Node {
 	return node.left
 }
 
+// Right returns the right child node. Returns nil if no right child exists.
 func (node *SemanticNode) Right() Node {
 	if node.right == nil {
 		return nil
@@ -75,6 +82,7 @@ func (node *SemanticNode) Right() Node {
 	return node.right
 }
 
+// Formulas returns an iterator over all formulas contained in the current node.
 func (node *SemanticNode) Formulas() iter.Seq[formula.Formula] {
 	return combineIterators(node.formulas.IterLiterals(), node.formulas.IterAlpha(), node.formulas.IterBeta())
 }
@@ -115,10 +123,12 @@ func (node *SemanticNode) String() string {
 	return res
 }
 
+// IsLeaf returns true if the node is a leaf.
 func (node *SemanticNode) IsLeaf() bool {
 	return node.left == nil && node.right == nil
 }
 
+// Height returns the height of the subtree rooted at the current node.
 func (node *SemanticNode) Height() int {
 	if node == nil {
 		return 0
@@ -127,10 +137,12 @@ func (node *SemanticNode) Height() int {
 	return 1 + max(node.left.Height(), node.right.Height())
 }
 
+// MarkAsClosed marks the node as closed.
 func (node *SemanticNode) MarkAsClosed() {
 	node.mark = Closed
 }
 
+// MarkAsOpen marks the node as open.
 func (node *SemanticNode) MarkAsOpen() {
 	node.mark = Open
 }
@@ -139,6 +151,8 @@ func (node *SemanticNode) MarkAsOpen() {
 // it can be assigned either true beta_or false, as it does not affect the evaluation of the formulas.
 type Assignment map[string]bool
 
+// IsSupersetOf returns true if the current assignment is a superset of the given assignment.
+// That is, for every propositional letter in b, a has the same assignment.
 func (a Assignment) IsSupersetOf(b Assignment) bool {
 	for k, v := range b {
 		if val, ok := a[k]; !ok || val != v {
@@ -148,6 +162,7 @@ func (a Assignment) IsSupersetOf(b Assignment) bool {
 	return true
 }
 
+// CleanAssignments returns a new slice without assignments that are superset of some of the other assignments.
 func CleanAssignments(assignments []Assignment) []Assignment {
 	var res []Assignment
 
@@ -199,6 +214,7 @@ func eval(node *SemanticNode) []Assignment {
 	return res
 }
 
+// Eval evaluates the semantic tableaux and returns a slice of assignments that satisfy the formulas.
 func (node *SemanticNode) Eval() []Assignment {
 	return CleanAssignments(eval(node))
 }
@@ -272,6 +288,7 @@ func buildSemanticTableaux(node *SemanticNode) {
 	}
 }
 
+// BuildSemanticTableaux builds a semantic tableaux for the given formula and returns the root node.
 func BuildSemanticTableaux(f formula.Formula) *SemanticNode {
 	node := &SemanticNode{
 		formulas: tsets.NewTSet(),
@@ -282,7 +299,10 @@ func BuildSemanticTableaux(f formula.Formula) *SemanticNode {
 	return node
 }
 
+// FormulaDrawer is a function that takes a formula and returns a string representation.
 type FormulaDrawer func(f formula.Formula) string
+
+// MarkDrawer is a function that takes a boolean indicating if the node is open and returns a string representation.
 type MarkDrawer func(open bool) string
 
 func formulasString(fs iter.Seq[formula.Formula], fd FormulaDrawer) string {
@@ -468,6 +488,7 @@ func texForestTree(tableaux Node, il int) string {
 	return res + "]"
 }
 
+// TexForestTree returns a LaTeX forest representation of the tableaux.
 func TexForestTree(tableaux Node) string {
 	t := texForestTree(tableaux, 0)
 	format := fmt.Sprintf(`
