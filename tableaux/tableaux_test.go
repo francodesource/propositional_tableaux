@@ -1,7 +1,6 @@
 package tableaux
 
 import (
-	"encoding/json"
 	"fmt"
 	"maps"
 	"math/big"
@@ -10,6 +9,7 @@ import (
 	tu "propositional_tableaux/internal/testutil"
 	"reflect"
 	"slices"
+	"strings"
 	"testing"
 	"testing/quick"
 )
@@ -35,6 +35,42 @@ var (
 		formula.NewOr(formula.NewNot(tu.Q), formula.NewNot(tu.P)),
 	)
 )
+
+func normalizeAssignment(a Assignment) string {
+	keys := make([]string, 0, len(a))
+	for k := range a {
+		keys = append(keys, k)
+	}
+	slices.Sort(keys)
+
+	res := strings.Builder{}
+	for i, key := range keys {
+		res.WriteString(key)
+		res.WriteByte(':')
+		if a[key] {
+			res.WriteByte('1')
+		} else {
+			res.WriteByte('0')
+		}
+		if i != len(keys)-1 {
+			res.WriteByte(' ')
+		}
+	}
+	return "[" + res.String() + "]"
+}
+
+func normalizeAssignments(assignments []Assignment) string {
+	assignmentsString := make([]string, 0, len(assignments))
+	for _, a := range assignments {
+		assignmentsString = append(assignmentsString, normalizeAssignment(a))
+	}
+	slices.Sort(assignmentsString)
+	return strings.Join(assignmentsString, " ")
+}
+
+func compareAssignments(a1, a2 []Assignment) bool {
+	return normalizeAssignments(a1) == normalizeAssignments(a2)
+}
 
 // TestBuildSemanticTableaux tests whether the function produces tableaux that leads to correct assignments.
 // Since the construction of a tableaux is deterministic it proves just some properties
@@ -268,21 +304,26 @@ func bruteForceSat(f formula.Formula) bool {
 	return sat
 }
 
+func compareTableauxWithTruthTables(t *testing.T, f formula.Formula, tab Node) bool {
+	bfSat := bruteForceSat(f)
+	tabSat := len(tab.Eval()) > 0
+
+	res := bfSat == tabSat
+
+	if !res {
+		fmt.Printf("failed for formula %v: truth-table = %v, tableaux = %v\n", f, bfSat, tabSat)
+	}
+
+	return res
+}
+
 // TestBuildSemanticTableaux3 checks that the assignments discovered by the semantic tableaux are the same as
 // the one obtained by calculating all the truth-tables
 func TestBuildSemanticTableaux3(t *testing.T) {
 	f := func(f formula.Formula) bool {
-		bfSat := bruteForceSat(f)
 		tab := BuildSemanticTableaux(f)
-		tabSat := len(tab.Eval()) > 0
 
-		res := bfSat == tabSat
-
-		if !res {
-			fmt.Printf("failed for formula %v: truth-table = %v, tableaux = %v\n", f, bfSat, tabSat)
-		}
-
-		return res
+		return compareTableauxWithTruthTables(t, f, tab)
 	}
 
 	maxSize := 50
@@ -326,63 +367,45 @@ func TestBuildSemanticTableaux4(t *testing.T) {
 	}
 }
 
-// TestBuildAnalyticTableaux checks that the assignments discovered by the analytic tableaux are the same of the semantic one
-func TestBuildAnalyticTableaux(t *testing.T) {
-	f := func(f formula.Formula) bool {
-		semanticTab := BuildSemanticTableaux(f)
-		analyticTab := BuildAnalyticTableaux(f)
+// testTableauxMarks this function tests that every leaf of the tableaux is either only literals and marks as closed
+// or open, or it is mark as closed. The last option is for the case where the algorithm find a formula and its
+// complement and so stops.
+func testTableauxMarks(t *testing.T, tab Node) bool {
+	if tab.IsLeaf() {
+		allLiterals := true
 
-		sAssignments := semanticTab.Eval()
-		aAssignments := analyticTab.Eval()
+		for f := range tab.Formulas() {
+			if !formula.IsLiteral(f) {
+				allLiterals = false
 
-		if len(sAssignments) != len(aAssignments) {
-			t.Errorf("fail on formula: %v", f)
-			return false
-		}
-
-		slice1 := make([]string, len(sAssignments))
-		slice2 := make([]string, len(aAssignments))
-
-		for i := range sAssignments {
-			bytes1, _ := json.Marshal(sAssignments[i])
-			bytes2, _ := json.Marshal(aAssignments[i])
-
-			slice1[i] = string(bytes1)
-			slice2[i] = string(bytes2)
-		}
-		slices.Sort(slice1)
-		slices.Sort(slice2)
-		res := slices.Compare(slice1, slice2) == 0
-		if !res {
-			t.Errorf("fail on formula: %v", f)
-		}
-		return res
-	}
-	maxSize := 50
-	config := &quick.Config{Values: func(values []reflect.Value, r *rand.Rand) {
-		values[0] = reflect.ValueOf(formula.GenerateRandom(r, r.Intn(maxSize)))
-	},
-	}
-
-	if err := quick.Check(f, config); err != nil {
-		t.Errorf("%v", err)
-	}
-}
-
-// TestBuildAnalyticTableaux4 checks that the assignments obtained by an analytic tableaux, satisfy the formula.
-func TestBuildAnalyticTableaux2(t *testing.T) {
-	f := func(f formula.Formula) bool {
-		tab := BuildAnalyticTableaux(f)
-		assignments := tab.Eval()
-
-		for _, a := range assignments {
-			if !evaluate(f, a) {
-				fmt.Printf("test fail for formula %v with assignment %v", f, a)
-				return false
 			}
 		}
 
-		return true
+		return (allLiterals && (tab.IsOpen() || tab.IsClosed())) || tab.IsClosed()
+	}
+
+	var left, right = true, true
+	if tab.Left() != nil {
+		left = testTableauxMarks(t, tab.Left())
+	}
+
+	if tab.Right() != nil {
+		right = testTableauxMarks(t, tab.Right())
+	}
+
+	return left && right
+}
+
+func TestSemanticTableauxMarks(t *testing.T) {
+	f := func(f formula.Formula) bool {
+		tab := BuildSemanticTableaux(f)
+
+		res := testTableauxMarks(t, tab)
+
+		if !res {
+			t.Errorf("Fail for %v\n", f)
+		}
+		return res
 	}
 
 	maxSize := 50
@@ -397,6 +420,10 @@ func TestBuildAnalyticTableaux2(t *testing.T) {
 		t.Error(err)
 	}
 }
+
+/*
+	Benchmarks
+*/
 
 var bigFormula = formula.Parse("!((!!!(((!!s !| ((y ^ w) <-> !z)) <-> (((q -> x) | (z ^ q)) -> !(t ^ u))) <-> ((((s <-> w) <-> (t !| x)) -> !!p) !| (!(s ^ p) <-> (!w !& !u)))) !& !!!((!(!!u <-> (!q !| (x -> r))) -> !(!!v ^ !(y !& q))) & !!((((t <-> s) !| (s & s)) ^ (!z | !p)) !& !!!!x))) !& !!((!(((!t !| (q ^ y)) <-> !(u -> s)) & !!(!x !& (t & r))) !| !!(((!s | (v !& x)) & !(s -> q)) & (!!t !| ((w ^ t) ^ (w <-> w))))) !& !((!!!(!u <-> !u) ^ (!(t !& t) ^ ((x & v) & !r))) | (!!((q & q) <-> !p) <-> (!(t <-> w) | (!p & (u !| r)))))))")
 

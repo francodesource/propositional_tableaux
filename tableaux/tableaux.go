@@ -39,6 +39,7 @@ type Node interface {
 	Left() Node
 	Right() Node
 	Formulas() iter.Seq[formula.Formula]
+	Eval() []Assignment
 }
 
 func combineIterators[T any](iters ...iter.Seq[T]) iter.Seq[T] {
@@ -217,6 +218,8 @@ func eval(node *SemanticNode) []Assignment {
 // Eval evaluates the semantic tableaux and returns a slice of assignments that satisfy the formulas.
 func (node *SemanticNode) Eval() []Assignment {
 	return CleanAssignments(eval(node))
+	// It is needed to clean the assignments since different kind of tableaux can produce
+	// redundant assignments. It is important for testing that assignments does not contain redundant assignments.
 }
 
 func buildSemanticTableaux(node *SemanticNode) {

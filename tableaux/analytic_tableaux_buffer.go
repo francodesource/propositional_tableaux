@@ -78,6 +78,10 @@ func (b BufferSet) HasComplementOf(fs ...formula.Formula) bool {
 	return false
 }
 
+func (b BufferSet) HasOnlyLiterals() bool {
+	return b[0] == nil || formula.IsLiteral(b[0]) && b[1] == nil || formula.IsLiteral(b[1])
+}
+
 // BufferedNode is a node in a buffered analytic tableaux.
 type BufferedNode struct {
 	formulas            BufferSet
@@ -315,6 +319,19 @@ func buildBufferedTableaux(a *BufferedNode, visited map[formula.Formula]bool) {
 			a.right.MarkAsClosed()
 		}
 		return
+	}
+
+	// If it reaches this point it means that it is not possible to apply any rule so the algorithm has finished,
+	// Except for the special case where an alpha formula contains two equals subformulas: the second one will already mark
+	// as visited, and it will create a leaf that does not contain just literals. So I check for this and enforce the
+	// application of the rule.
+
+	if !a.formulas.HasOnlyLiterals() {
+		newVisited := maps.Clone(visited)
+		for f := range a.Formulas() {
+			newVisited[f] = false
+		}
+		buildBufferedTableaux(a, newVisited)
 	}
 
 	a.MarkAsOpen()

@@ -260,6 +260,19 @@ func buildAnalyticTableaux(a *AnalyticNode, visited map[formula.Formula]bool) {
 		return
 	}
 
+	// If it reaches this point it means that it is not possible to apply any rule so the algorithm has finished,
+	// Except for the special case where an alpha formula contains two equals subformulas: the second one will already mark
+	// as visited, and it will create a leaf that does not contain just literals. So I check for this and enforce the
+	// application of the rule.
+
+	if !a.formulas.HasOnlyLiterals() {
+		newVisited := maps.Clone(visited)
+		for f := range a.Formulas() {
+			newVisited[f] = false
+		}
+		buildAnalyticTableaux(a, newVisited)
+	}
+
 	a.MarkAsOpen()
 
 }

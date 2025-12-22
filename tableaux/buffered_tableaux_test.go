@@ -1,11 +1,9 @@
 package tableaux
 
 import (
-	"encoding/json"
 	"math/rand"
 	"propositional_tableaux/formula"
 	"reflect"
-	"slices"
 	"testing"
 	"testing/quick"
 )
@@ -131,24 +129,7 @@ func TestBuildBufferedTableaux(t *testing.T) {
 		sAssignments := semanticTab.Eval()
 		bAssignments := analyticTab.Eval()
 
-		if len(sAssignments) != len(bAssignments) {
-			t.Errorf("fail on formula: %v", f)
-			return false
-		}
-
-		slice1 := make([]string, len(sAssignments))
-		slice2 := make([]string, len(bAssignments))
-
-		for i := range sAssignments {
-			bytes1, _ := json.Marshal(sAssignments[i])
-			bytes2, _ := json.Marshal(bAssignments[i])
-
-			slice1[i] = string(bytes1)
-			slice2[i] = string(bytes2)
-		}
-		slices.Sort(slice1)
-		slices.Sort(slice2)
-		res := slices.Compare(slice1, slice2) == 0
+		res := compareAssignments(sAssignments, bAssignments)
 		if !res {
 			t.Errorf("fail on formula: %v", f)
 		}
@@ -175,24 +156,8 @@ func TestBuildBufferedTableaux2(t *testing.T) {
 		sAssignments := semanticTab.Eval()
 		bAssignments := analyticTab.Eval()
 
-		if len(sAssignments) != len(bAssignments) {
-			t.Errorf("fail on formula: %v", f)
-			return false
-		}
+		res := compareAssignments(sAssignments, bAssignments)
 
-		slice1 := make([]string, len(sAssignments))
-		slice2 := make([]string, len(bAssignments))
-
-		for i := range sAssignments {
-			bytes1, _ := json.Marshal(sAssignments[i])
-			bytes2, _ := json.Marshal(bAssignments[i])
-
-			slice1[i] = string(bytes1)
-			slice2[i] = string(bytes2)
-		}
-		slices.Sort(slice1)
-		slices.Sort(slice2)
-		res := slices.Compare(slice1, slice2) == 0
 		if !res {
 			t.Errorf("fail on formula: %v", f)
 		}
@@ -207,5 +172,30 @@ func TestBuildBufferedTableaux2(t *testing.T) {
 
 	if err := quick.Check(f, config); err != nil {
 		t.Errorf("%v", err)
+	}
+}
+
+func TestBufferedTableauxMarks(t *testing.T) {
+	f := func(f formula.Formula) bool {
+		tab := BuildBufferedTableaux(f)
+
+		res := testTableauxMarks(t, tab)
+
+		if !res {
+			t.Errorf("Fail for %v\n", f)
+		}
+		return res
+	}
+
+	maxSize := 50
+
+	config := &quick.Config{
+		Values: func(values []reflect.Value, r *rand.Rand) {
+			values[0] = reflect.ValueOf(formula.GenerateRandom(r, r.Intn(maxSize)))
+		},
+	}
+
+	if err := quick.Check(f, config); err != nil {
+		t.Error(err)
 	}
 }
