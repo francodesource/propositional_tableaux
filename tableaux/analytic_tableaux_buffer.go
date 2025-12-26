@@ -79,7 +79,7 @@ func (b BufferSet) HasComplementOf(fs ...formula.Formula) bool {
 }
 
 func (b BufferSet) HasOnlyLiterals() bool {
-	return b[0] == nil || formula.IsLiteral(b[0]) && b[1] == nil || formula.IsLiteral(b[1])
+	return (b[0] == nil || formula.IsLiteral(b[0])) && (b[1] == nil || formula.IsLiteral(b[1]))
 }
 
 // BufferNode is a node in a buffered analytic tableaux.
