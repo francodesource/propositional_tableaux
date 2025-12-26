@@ -36,8 +36,8 @@ func TestBuildAnalyticTableaux_SemanticCompare(t *testing.T) {
 	}
 }
 
-// TestBuildAnalyticTableaux2 checks that the assignments obtained by an analytic tableaux, satisfy the formula.
-func TestBuildAnalyticTableaux2(t *testing.T) {
+// TestBuildAnalyticTableaux_Assignments checks that the assignments obtained by an analytic tableaux, satisfy the formula.
+func TestBuildAnalyticTableaux_Assignments(t *testing.T) {
 	f := func(f formula.Formula) bool {
 		tab := BuildAnalyticTableaux(f)
 		assignments := tab.Eval()
@@ -65,8 +65,8 @@ func TestBuildAnalyticTableaux2(t *testing.T) {
 	}
 }
 
-// TestBuildAnalyticTableaux3 compares analytic tableaux results with the one of the truth tables
-func TestBuildAnalyticTableaux3(t *testing.T) {
+// TestBuildAnalyticTableaux_TruthTables compares analytic tableaux results with the one of the truth tables
+func TestBuildAnalyticTableaux_TruthTables(t *testing.T) {
 	f := func(f formula.Formula) bool {
 		tab := BuildAnalyticTableaux(f)
 
