@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"github.com/m1gwings/treedrawer/tree"
 	"iter"
+	"maps"
 	"propositional_tableaux/formula"
 	"propositional_tableaux/tableaux/tsets"
+	"slices"
 	"strings"
 )
 
@@ -163,16 +165,53 @@ func (a Assignment) IsSupersetOf(b Assignment) bool {
 	return true
 }
 
+// normalizeAssignment returns a deterministic string representation of an assignment.
+func normalizeAssignment(a Assignment) string {
+	keys := make([]string, 0, len(a))
+	for k := range a {
+		keys = append(keys, k)
+	}
+	slices.Sort(keys)
+
+	res := strings.Builder{}
+	for i, key := range keys {
+		res.WriteString(key)
+		res.WriteByte(':')
+		if a[key] {
+			res.WriteByte('1')
+		} else {
+			res.WriteByte('0')
+		}
+		if i != len(keys)-1 {
+			res.WriteByte(' ')
+		}
+	}
+	return "[" + res.String() + "]"
+}
+
 // CleanAssignments returns a new slice without assignments that are superset of some of the other assignments.
 func CleanAssignments(assignments []Assignment) []Assignment {
 	var res []Assignment
+	var occurrencies = make(map[string]bool)
 
-	for _, a1 := range assignments {
+outer:
+	for i, a1 := range assignments {
 		isSuperSetOfAny := false
-		for _, a2 := range res {
-			if a1.IsSupersetOf(a2) {
-				isSuperSetOfAny = true
-				break
+		for j, a2 := range assignments {
+			if i != j {
+				// I need to check if the assignments are equal to avoid that two equal assignments are
+				// detected as superset one of each others and no one is added to res.
+				if maps.Equal(a1, a2) {
+					na := normalizeAssignment(a1) // I normalize it to use this as map key.
+					if !occurrencies[na] {        // This means I can add one assignment one time
+						res = append(res, a1)
+						occurrencies[na] = true
+					}
+					continue outer // Here I skip to next element
+				} else if a1.IsSupersetOf(a2) { // If it is a superset I do not add it
+					isSuperSetOfAny = true
+					break
+				}
 			}
 		}
 		if !isSuperSetOfAny {

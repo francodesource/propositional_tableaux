@@ -36,29 +36,6 @@ var (
 	)
 )
 
-func normalizeAssignment(a Assignment) string {
-	keys := make([]string, 0, len(a))
-	for k := range a {
-		keys = append(keys, k)
-	}
-	slices.Sort(keys)
-
-	res := strings.Builder{}
-	for i, key := range keys {
-		res.WriteString(key)
-		res.WriteByte(':')
-		if a[key] {
-			res.WriteByte('1')
-		} else {
-			res.WriteByte('0')
-		}
-		if i != len(keys)-1 {
-			res.WriteByte(' ')
-		}
-	}
-	return "[" + res.String() + "]"
-}
-
 func normalizeAssignments(assignments []Assignment) string {
 	assignmentsString := make([]string, 0, len(assignments))
 	for _, a := range assignments {

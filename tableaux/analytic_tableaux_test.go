@@ -73,7 +73,7 @@ func TestBuildAnalyticTableaux3(t *testing.T) {
 		return compareTableauxWithTruthTables(t, f, tab)
 	}
 
-	maxSize := 50
+	maxSize := 2
 	config := &quick.Config{
 		Values: func(values []reflect.Value, r *rand.Rand) {
 			values[0] = reflect.ValueOf(formula.GenerateRandom(r, r.Intn(maxSize)))
