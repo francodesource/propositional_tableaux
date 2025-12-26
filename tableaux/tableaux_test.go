@@ -200,6 +200,8 @@ func TestBuildSemanticTableaux_Tautologies(t *testing.T) {
 /*
 	Property based testing
 */
+// FormulaMaxSize is the maximum size of a formula in property based testing.
+const FormulaMaxSize = 100
 
 func allLetters(f formula.Formula, letters map[string]struct{}) {
 	switch f := f.(type) {
@@ -303,7 +305,7 @@ func TestBuildSemanticTableaux_TruthTables(t *testing.T) {
 		return compareTableauxWithTruthTables(t, f, tab)
 	}
 
-	maxSize := 50
+	maxSize := FormulaMaxSize
 	config := &quick.Config{
 		Values: func(values []reflect.Value, r *rand.Rand) {
 			values[0] = reflect.ValueOf(formula.GenerateRandom(r, r.Intn(maxSize)))
@@ -331,7 +333,7 @@ func TestBuildSemanticTableaux_Assignments(t *testing.T) {
 		return true
 	}
 
-	maxSize := 50
+	maxSize := FormulaMaxSize
 
 	config := &quick.Config{
 		Values: func(values []reflect.Value, r *rand.Rand) {
@@ -358,7 +360,15 @@ func testTableauxMarks(t *testing.T, tab Node) bool {
 			}
 		}
 
-		return (allLiterals && (tab.IsOpen() || tab.IsClosed())) || tab.IsClosed()
+		res := (allLiterals && (tab.IsOpen() || tab.IsClosed())) || tab.IsClosed()
+
+		if !res {
+			t.Errorf("all literals = %v", allLiterals)
+			t.Errorf("node mark open = %v", tab.IsOpen())
+			t.Errorf("node mark close = %v", tab.IsClosed())
+		}
+
+		return res
 	}
 
 	var left, right = true, true
@@ -385,7 +395,7 @@ func TestSemanticTableaux_Marks(t *testing.T) {
 		return res
 	}
 
-	maxSize := 50
+	maxSize := FormulaMaxSize
 
 	config := &quick.Config{
 		Values: func(values []reflect.Value, r *rand.Rand) {
@@ -402,21 +412,63 @@ func TestSemanticTableaux_Marks(t *testing.T) {
 	Benchmarks
 */
 
+// command for launching benchmarks from terminal:
+// go test ./tableaux -bench=Tableaux -benchmem -run=^$
+var hugeFormula = formula.Parse("((!(!(!!((x !| w) | (s !& s)) ^ ((!z | (s !& q)) <-> (!v !| !z))) !& !((!(v !| s) !& (!p | (r !& s))) !| ((!s | !p) -> ((t <-> p) <-> (p <-> p))))) | (!(!!(!z <-> (p !& q)) | !(((x !| u) !& (z -> x)) <-> ((q !& x) | !p))) <-> ((((z ^ t) ^ !u) <-> ((x | x) <-> (x !& y))) ^ (!(!x -> (v !& s)) | ((z & v) !| !p))))) !| !(((!((!s & !x) ^ ((p <-> u) !| !t)) & !(((z !& z) ^ !v) -> !!z)) !& (((!z & (p ^ u)) -> (!x -> (z & p))) & (((s !| q) <-> !p) <-> !((t & v) ^ (u -> p))))) ^ ((!(!!p -> ((p -> w) | (v -> t))) ^ !(!!t | (!z ^ (v & s)))) !| !((!!u | ((r !| t) -> (v & u))) & (!(r !| t) | !(v <-> r))))))")
 var bigFormula = formula.Parse("!((!!!(((!!s !| ((y ^ w) <-> !z)) <-> (((q -> x) | (z ^ q)) -> !(t ^ u))) <-> ((((s <-> w) <-> (t !| x)) -> !!p) !| (!(s ^ p) <-> (!w !& !u)))) !& !!!((!(!!u <-> (!q !| (x -> r))) -> !(!!v ^ !(y !& q))) & !!((((t <-> s) !| (s & s)) ^ (!z | !p)) !& !!!!x))) !& !!((!(((!t !| (q ^ y)) <-> !(u -> s)) & !!(!x !& (t & r))) !| !!(((!s | (v !& x)) & !(s -> q)) & (!!t !| ((w ^ t) ^ (w <-> w))))) !& !((!!!(!u <-> !u) ^ (!(t !& t) ^ ((x & v) & !r))) | (!!((q & q) <-> !p) <-> (!(t <-> w) | (!p & (u !| r)))))))")
+var smallFormula = formula.Parse("((!(t <-> q) !| !(v ^ x)) !& (((y | u) !& (x !| z)) !| !(p & z)))")
 
-func BenchmarkBuildSemanticTableaux(b *testing.B) {
+func BenchmarkBuildSemanticTableaux_Small(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		BuildSemanticTableaux(smallFormula)
+	}
+}
+
+func BenchmarkBuildAnalyticTableaux_Small(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		BuildAnalyticTableaux(smallFormula)
+	}
+}
+
+func BenchmarkBuildBufferedTableaux_Small(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		BuildBufferTableaux(smallFormula)
+	}
+}
+
+func BenchmarkBuildSemanticTableaux_Big(b *testing.B) {
+
 	for i := 0; i < b.N; i++ {
 		BuildSemanticTableaux(bigFormula)
 	}
 }
 
-func BenchmarkBuildAnalyticTableaux(b *testing.B) {
+func BenchmarkBuildAnalyticTableaux_Big(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		BuildAnalyticTableaux(bigFormula)
 	}
 }
 
-func BenchmarkBuildBufferedTableaux(b *testing.B) {
+func BenchmarkBuildBufferedTableaux_Big(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		BuildBufferTableaux(bigFormula)
+	}
+}
+
+func BenchmarkBuildSemanticTableaux_Huge(b *testing.B) {
+
+	for i := 0; i < b.N; i++ {
+		BuildSemanticTableaux(hugeFormula)
+	}
+}
+
+func BenchmarkBuildAnalyticTableaux_Huge(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		BuildAnalyticTableaux(bigFormula)
+	}
+}
+
+func BenchmarkBuildBufferedTableaux_Huge(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		BuildBufferTableaux(bigFormula)
 	}

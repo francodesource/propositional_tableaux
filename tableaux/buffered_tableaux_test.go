@@ -135,7 +135,7 @@ func TestBuildBufferTableaux_SemanticCompare(t *testing.T) {
 		}
 		return res
 	}
-	maxSize := 50
+	maxSize := FormulaMaxSize
 	config := &quick.Config{
 		Values: func(values []reflect.Value, r *rand.Rand) {
 			values[0] = reflect.ValueOf(formula.GenerateRandom(r, r.Intn(maxSize)))
@@ -163,7 +163,7 @@ func TestBuildBufferTableaux_AnalyticCompare(t *testing.T) {
 		}
 		return res
 	}
-	maxSize := 50
+	maxSize := FormulaMaxSize
 	config := &quick.Config{
 		Values: func(values []reflect.Value, r *rand.Rand) {
 			values[0] = reflect.ValueOf(formula.GenerateRandom(r, r.Intn(maxSize)))
@@ -187,7 +187,7 @@ func TestBufferTableauxMarks(t *testing.T) {
 		return res
 	}
 
-	maxSize := 50
+	maxSize := FormulaMaxSize
 
 	config := &quick.Config{
 		Values: func(values []reflect.Value, r *rand.Rand) {

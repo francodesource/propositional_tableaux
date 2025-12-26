@@ -25,7 +25,7 @@ func TestBuildAnalyticTableaux_SemanticCompare(t *testing.T) {
 		}
 		return res
 	}
-	maxSize := 50
+	maxSize := FormulaMaxSize
 	config := &quick.Config{Values: func(values []reflect.Value, r *rand.Rand) {
 		values[0] = reflect.ValueOf(formula.GenerateRandom(r, r.Intn(maxSize)))
 	},
@@ -52,7 +52,7 @@ func TestBuildAnalyticTableaux2(t *testing.T) {
 		return true
 	}
 
-	maxSize := 50
+	maxSize := FormulaMaxSize
 
 	config := &quick.Config{
 		Values: func(values []reflect.Value, r *rand.Rand) {
@@ -73,7 +73,7 @@ func TestBuildAnalyticTableaux3(t *testing.T) {
 		return compareTableauxWithTruthTables(t, f, tab)
 	}
 
-	maxSize := 2
+	maxSize := FormulaMaxSize
 	config := &quick.Config{
 		Values: func(values []reflect.Value, r *rand.Rand) {
 			values[0] = reflect.ValueOf(formula.GenerateRandom(r, r.Intn(maxSize)))
@@ -97,7 +97,7 @@ func TestAnalyticTableauxMarks(t *testing.T) {
 		return res
 	}
 
-	maxSize := 50
+	maxSize := FormulaMaxSize
 
 	config := &quick.Config{
 		Values: func(values []reflect.Value, r *rand.Rand) {

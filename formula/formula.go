@@ -256,20 +256,26 @@ func Complement(formula Formula) Formula {
 	}
 }
 
-// GenerateRandom generates a random formula of the given size.
+// GenerateRandom generates a random formula of the given size. Size is the number of nodes.
 func GenerateRandom(rand *rand.Rand, size int) Formula {
-	if size <= 0 {
+	if size <= 1 {
 		letters := "pqrstuvwxyz"
 		randLetter := letters[rand.Intn(len(letters))]
 		return NewLetter(string(randLetter))
 	}
 
-	negation := rand.Intn(2) == 1
-
-	if negation {
+	if size == 2 {
 		return NewNot(GenerateRandom(rand, size-1))
-	} else {
-		return NewBinary(GenerateRandom(rand, size/2), GenerateRandom(rand, size/2),
-			Operator(rand.Intn(7))) // random binary operation
 	}
+
+	if rand.Intn(2) == 0 {
+		return NewNot(GenerateRandom(rand, size-1))
+	}
+
+	leftSize := rand.Intn(size-2) + 1
+	rightSize := size - 1 - leftSize
+
+	return NewBinary(GenerateRandom(rand, leftSize), GenerateRandom(rand, rightSize),
+		Operator(rand.Intn(7))) // random binary operation
+
 }
