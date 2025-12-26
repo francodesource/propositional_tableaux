@@ -2,9 +2,9 @@ package tableaux
 
 import (
 	"fmt"
+	"github.com/francodesource/propositional_tableaux/formula"
 	"iter"
 	"maps"
-	"propositional_tableaux/formula"
 	"slices"
 	"strings"
 )

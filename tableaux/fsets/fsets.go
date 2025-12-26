@@ -1,9 +1,9 @@
 package fsets
 
 import (
+	"github.com/francodesource/propositional_tableaux/formula"
 	"iter"
 	"maps"
-	"propositional_tableaux/formula"
 	"strings"
 )
 

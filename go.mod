@@ -1,4 +1,4 @@
-module propositional_tableaux
+module github.com/francodesource/propositional_tableaux
 
 go 1.23.5
 

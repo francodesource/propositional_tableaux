@@ -1,8 +1,8 @@
 package tableaux
 
 import (
-	"propositional_tableaux/formula"
-	tu "propositional_tableaux/internal/testutil"
+	"github.com/francodesource/propositional_tableaux/formula"
+	tu "github.com/francodesource/propositional_tableaux/internal/testutil"
 	"testing"
 )
 

@@ -1,10 +1,10 @@
 package tableaux
 
 import (
+	"github.com/francodesource/propositional_tableaux/formula"
+	"github.com/francodesource/propositional_tableaux/tableaux/tsets"
 	"iter"
 	"maps"
-	"propositional_tableaux/formula"
-	"propositional_tableaux/tableaux/tsets"
 )
 
 // AnalyticNode represents a node in an analytic tableaux.

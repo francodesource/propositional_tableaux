@@ -1,6 +1,6 @@
 package testutil
 
-import "propositional_tableaux/formula"
+import "github.com/francodesource/propositional_tableaux/formula"
 
 /*
    Predefined letters for testing

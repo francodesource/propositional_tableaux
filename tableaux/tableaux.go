@@ -2,11 +2,11 @@ package tableaux
 
 import (
 	"fmt"
+	"github.com/francodesource/propositional_tableaux/formula"
+	"github.com/francodesource/propositional_tableaux/tableaux/tsets"
 	"github.com/m1gwings/treedrawer/tree"
 	"iter"
 	"maps"
-	"propositional_tableaux/formula"
-	"propositional_tableaux/tableaux/tsets"
 	"slices"
 	"strings"
 )

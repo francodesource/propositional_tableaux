@@ -2,8 +2,8 @@ package tableaux
 
 import (
 	"fmt"
+	"github.com/francodesource/propositional_tableaux/formula"
 	"math/rand"
-	"propositional_tableaux/formula"
 	"reflect"
 	"testing"
 	"testing/quick"

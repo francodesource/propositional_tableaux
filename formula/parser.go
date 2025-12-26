@@ -2,7 +2,7 @@ package formula
 
 import (
 	"github.com/antlr4-go/antlr/v4"
-	"propositional_tableaux/formula/parser"
+	"github.com/francodesource/propositional_tableaux/formula/parser"
 )
 
 type formulaListener struct {

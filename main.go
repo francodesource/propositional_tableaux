@@ -5,10 +5,10 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"github.com/francodesource/propositional_tableaux/formula"
+	"github.com/francodesource/propositional_tableaux/tableaux"
 	"io"
 	"os"
-	"propositional_tableaux/formula"
-	"propositional_tableaux/tableaux"
 )
 
 type nopWriteCloser struct {

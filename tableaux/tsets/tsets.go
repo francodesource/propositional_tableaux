@@ -2,9 +2,9 @@ package tsets
 
 import (
 	"fmt"
+	"github.com/francodesource/propositional_tableaux/formula"
+	"github.com/francodesource/propositional_tableaux/tableaux/fsets"
 	"iter"
-	"propositional_tableaux/formula"
-	"propositional_tableaux/tableaux/fsets"
 )
 
 // TSet represents a set specialized for tableaux formulas sets.

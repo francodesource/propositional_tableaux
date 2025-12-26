@@ -2,7 +2,7 @@ package tableaux
 
 import (
 	"fmt"
-	"propositional_tableaux/formula"
+	"github.com/francodesource/propositional_tableaux/formula"
 )
 
 // Rule represent a rule of the tableaux calculus that takes two formulas and returns two formulas.

@@ -1,9 +1,9 @@
 package tsets
 
 import (
+	"github.com/francodesource/propositional_tableaux/formula"
+	tu "github.com/francodesource/propositional_tableaux/internal/testutil"
 	"maps"
-	"propositional_tableaux/formula"
-	tu "propositional_tableaux/internal/testutil"
 	"testing"
 )
 

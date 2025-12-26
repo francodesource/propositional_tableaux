@@ -2,11 +2,11 @@ package tableaux
 
 import (
 	"fmt"
+	"github.com/francodesource/propositional_tableaux/formula"
+	tu "github.com/francodesource/propositional_tableaux/internal/testutil"
 	"maps"
 	"math/big"
 	"math/rand"
-	"propositional_tableaux/formula"
-	tu "propositional_tableaux/internal/testutil"
 	"reflect"
 	"slices"
 	"strings"
