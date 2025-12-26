@@ -82,15 +82,15 @@ func (b BufferSet) HasOnlyLiterals() bool {
 	return b[0] == nil || formula.IsLiteral(b[0]) && b[1] == nil || formula.IsLiteral(b[1])
 }
 
-// BufferedNode is a node in a buffered analytic tableaux.
-type BufferedNode struct {
+// BufferNode is a node in a buffered analytic tableaux.
+type BufferNode struct {
 	formulas            BufferSet
-	left, right, father *BufferedNode
+	left, right, father *BufferNode
 	mark                Mark
 }
 
 // Father returns the father node of the current node. Returns nil if the node is root.
-func (b *BufferedNode) Father() *BufferedNode {
+func (b *BufferNode) Father() *BufferNode {
 	if b.father == nil {
 		return nil
 	}
@@ -98,7 +98,7 @@ func (b *BufferedNode) Father() *BufferedNode {
 }
 
 // Left returns the left child node of the current node. Returns nil if no left child exists.
-func (b *BufferedNode) Left() Node {
+func (b *BufferNode) Left() Node {
 	if b.left == nil {
 		return nil
 	}
@@ -106,7 +106,7 @@ func (b *BufferedNode) Left() Node {
 }
 
 // Right returns the right child node of the current node. Returns nil if no right child exists.
-func (b *BufferedNode) Right() Node {
+func (b *BufferNode) Right() Node {
 	if b.right == nil {
 		return nil
 	}
@@ -114,7 +114,7 @@ func (b *BufferedNode) Right() Node {
 }
 
 // Formulas returns an iterator over all formulas contained in the current node, filtered of nil values.
-func (b *BufferedNode) Formulas() iter.Seq[formula.Formula] {
+func (b *BufferNode) Formulas() iter.Seq[formula.Formula] {
 	res := make([]formula.Formula, 0, 2)
 
 	for _, f := range b.formulas {
@@ -127,7 +127,7 @@ func (b *BufferedNode) Formulas() iter.Seq[formula.Formula] {
 }
 
 // BranchHasComplementPairOf checks if the current node branch has a complement pair of at least one of the given formulas.
-func (b *BufferedNode) BranchHasComplementPairOf(fs ...formula.Formula) bool {
+func (b *BufferNode) BranchHasComplementPairOf(fs ...formula.Formula) bool {
 	for _, f := range fs {
 		if f != nil && b.formulas.HasComplementOf(f) {
 			return true
@@ -143,7 +143,7 @@ func (b *BufferedNode) BranchHasComplementPairOf(fs ...formula.Formula) bool {
 
 // ChooseAlphaFormula chooses a random alpha formula from the current node branch.
 // Returns nil if no alpha formula is available
-func (b *BufferedNode) ChooseAlphaFormula(visited map[formula.Formula]bool) (res formula.Formula) {
+func (b *BufferNode) ChooseAlphaFormula(visited map[formula.Formula]bool) (res formula.Formula) {
 	for _, f := range b.formulas {
 		if f != nil && f.Class() == formula.Alpha && !visited[f] {
 			return f
@@ -159,7 +159,7 @@ func (b *BufferedNode) ChooseAlphaFormula(visited map[formula.Formula]bool) (res
 
 // ChooseBetaFormula chooses a random beta formula from the current node branch.
 // Returns nil if no beta formula is available
-func (b *BufferedNode) ChooseBetaFormula(visited map[formula.Formula]bool) (res formula.Formula) {
+func (b *BufferNode) ChooseBetaFormula(visited map[formula.Formula]bool) (res formula.Formula) {
 	for _, f := range b.formulas {
 		if f != nil && f.Class() == formula.Beta && !visited[f] {
 			return f
@@ -174,31 +174,31 @@ func (b *BufferedNode) ChooseBetaFormula(visited map[formula.Formula]bool) (res 
 }
 
 // MarkAsClosed marks the current node as closed.
-func (b *BufferedNode) MarkAsClosed() {
+func (b *BufferNode) MarkAsClosed() {
 	b.mark = Closed
 }
 
 // MarkAsOpen marks the current node as open.
-func (b *BufferedNode) MarkAsOpen() {
+func (b *BufferNode) MarkAsOpen() {
 	b.mark = Open
 }
 
 // IsLeaf returns true if the current node is a leaf (i.e., has no children).
-func (b *BufferedNode) IsLeaf() bool {
+func (b *BufferNode) IsLeaf() bool {
 	return b.left == nil && b.right == nil
 }
 
 // IsClosed returns true if the current node is a closed leaf.
-func (b *BufferedNode) IsClosed() bool {
+func (b *BufferNode) IsClosed() bool {
 	return b.IsLeaf() && b.mark == Closed
 }
 
 // IsOpen returns true if the current node is an open leaf.
-func (b *BufferedNode) IsOpen() bool {
+func (b *BufferNode) IsOpen() bool {
 	return b.IsLeaf() && b.mark == Open
 }
 
-func (b *BufferedNode) String() string {
+func (b *BufferNode) String() string {
 	var res string
 
 	res = "{\n  values: " + b.formulas.String()
@@ -218,7 +218,7 @@ func (b *BufferedNode) String() string {
 	return res
 }
 
-func (b *BufferedNode) collectLiterals(literals map[formula.Literal]bool) {
+func (b *BufferNode) collectLiterals(literals map[formula.Literal]bool) {
 	for _, f := range b.formulas {
 		if f != nil && formula.IsLiteral(f) {
 			literals[formula.AsLiteral(f)] = true
@@ -230,7 +230,7 @@ func (b *BufferedNode) collectLiterals(literals map[formula.Literal]bool) {
 	}
 }
 
-func (b *BufferedNode) eval() []Assignment {
+func (b *BufferNode) eval() []Assignment {
 
 	if b.IsClosed() {
 		return []Assignment{}
@@ -261,11 +261,11 @@ func (b *BufferedNode) eval() []Assignment {
 }
 
 // Eval evaluates the buffered tableaux and returns all satisfying assignments cleaned of the redundant assignments.
-func (b *BufferedNode) Eval() []Assignment {
+func (b *BufferNode) Eval() []Assignment {
 	return CleanAssignments(b.eval())
 }
 
-func buildBufferedTableaux(a *BufferedNode, visited map[formula.Formula]bool) {
+func buildBufferedTableaux(a *BufferNode, visited map[formula.Formula]bool) {
 	alpha := a.ChooseAlphaFormula(visited)
 
 	if alpha != nil {
@@ -274,7 +274,7 @@ func buildBufferedTableaux(a *BufferedNode, visited map[formula.Formula]bool) {
 		left, right := ApplyRule(alpha)
 		newBuff := NewBufferSet(left, right)
 
-		a.left = &BufferedNode{
+		a.left = &BufferNode{
 			formulas: newBuff,
 			father:   a,
 		}
@@ -297,12 +297,12 @@ func buildBufferedTableaux(a *BufferedNode, visited map[formula.Formula]bool) {
 
 		rightSet := NewBufferSet(right)
 
-		a.left = &BufferedNode{
+		a.left = &BufferNode{
 			formulas: leftSet,
 			father:   a,
 		}
 
-		a.right = &BufferedNode{
+		a.right = &BufferNode{
 			formulas: rightSet,
 			father:   a,
 		}
@@ -338,11 +338,11 @@ func buildBufferedTableaux(a *BufferedNode, visited map[formula.Formula]bool) {
 
 }
 
-// BuildBufferedTableaux builds a buffered analytic tableaux for the given formula.
-func BuildBufferedTableaux(f formula.Formula) *BufferedNode {
+// BuildBufferTableaux builds a buffered analytic tableaux for the given formula.
+func BuildBufferTableaux(f formula.Formula) *BufferNode {
 	set := NewBufferSet(f)
 
-	res := &BufferedNode{formulas: set}
+	res := &BufferNode{formulas: set}
 	buildBufferedTableaux(res, make(map[formula.Formula]bool))
 
 	return res

@@ -311,15 +311,15 @@ func compareTableauxWithTruthTables(t *testing.T, f formula.Formula, tab Node) b
 	res := bfSat == tabSat
 
 	if !res {
-		fmt.Printf("failed for formula %v: truth-table = %v, tableaux = %v\n", f, bfSat, tabSat)
+		t.Errorf("failed for formula %v: truth-table = %v, tableaux = %v\n", f, bfSat, tabSat)
 	}
 
 	return res
 }
 
-// TestBuildSemanticTableaux3 checks that the assignments discovered by the semantic tableaux are the same as
+// TestBuildSemanticTableaux_TruthTables checks that the assignments discovered by the semantic tableaux are the same as
 // the one obtained by calculating all the truth-tables
-func TestBuildSemanticTableaux3(t *testing.T) {
+func TestBuildSemanticTableaux_TruthTables(t *testing.T) {
 	f := func(f formula.Formula) bool {
 		tab := BuildSemanticTableaux(f)
 
@@ -338,8 +338,8 @@ func TestBuildSemanticTableaux3(t *testing.T) {
 	}
 }
 
-// TestBuildSemanticTableaux4 checks that the assignments obtained by a semantic tableaux, satisfy the formula.
-func TestBuildSemanticTableaux4(t *testing.T) {
+// TestBuildSemanticTableaux_Assignments checks that the assignments obtained by a semantic tableaux, satisfy the formula.
+func TestBuildSemanticTableaux_Assignments(t *testing.T) {
 	f := func(f formula.Formula) bool {
 		tab := BuildSemanticTableaux(f)
 		assignments := tab.Eval()
@@ -396,7 +396,7 @@ func testTableauxMarks(t *testing.T, tab Node) bool {
 	return left && right
 }
 
-func TestSemanticTableauxMarks(t *testing.T) {
+func TestSemanticTableaux_Marks(t *testing.T) {
 	f := func(f formula.Formula) bool {
 		tab := BuildSemanticTableaux(f)
 
@@ -441,6 +441,6 @@ func BenchmarkBuildAnalyticTableaux(b *testing.B) {
 
 func BenchmarkBuildBufferedTableaux(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		BuildBufferedTableaux(bigFormula)
+		BuildBufferTableaux(bigFormula)
 	}
 }

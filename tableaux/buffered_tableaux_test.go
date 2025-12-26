@@ -120,11 +120,11 @@ func TestBufferSet_HasComplementOf(t *testing.T) {
 	}
 }
 
-// TestBuildAnalyticTableaux checks that the assignments discovered by the buffered analytic tableaux are the same of the semantic one
-func TestBuildBufferedTableaux(t *testing.T) {
+// TestBuildBufferTableaux_SemanticCompare checks that the assignments discovered by the buffered analytic tableaux are the same of the semantic one
+func TestBuildBufferTableaux_SemanticCompare(t *testing.T) {
 	f := func(f formula.Formula) bool {
 		semanticTab := BuildSemanticTableaux(f)
-		analyticTab := BuildBufferedTableaux(f)
+		analyticTab := BuildBufferTableaux(f)
 
 		sAssignments := semanticTab.Eval()
 		bAssignments := analyticTab.Eval()
@@ -147,11 +147,11 @@ func TestBuildBufferedTableaux(t *testing.T) {
 	}
 }
 
-// TestBuildAnalyticTableaux checks that the assignments discovered by the buffered analytic tableaux are the same of the analytic one
-func TestBuildBufferedTableaux2(t *testing.T) {
+// TestBuildBufferTableaux_AnalyticCompare checks that the assignments discovered by the buffered analytic tableaux are the same of the analytic one
+func TestBuildBufferTableaux_AnalyticCompare(t *testing.T) {
 	f := func(f formula.Formula) bool {
 		semanticTab := BuildAnalyticTableaux(f)
-		analyticTab := BuildBufferedTableaux(f)
+		analyticTab := BuildBufferTableaux(f)
 
 		sAssignments := semanticTab.Eval()
 		bAssignments := analyticTab.Eval()
@@ -175,9 +175,9 @@ func TestBuildBufferedTableaux2(t *testing.T) {
 	}
 }
 
-func TestBufferedTableauxMarks(t *testing.T) {
+func TestBufferTableauxMarks(t *testing.T) {
 	f := func(f formula.Formula) bool {
-		tab := BuildBufferedTableaux(f)
+		tab := BuildBufferTableaux(f)
 
 		res := testTableauxMarks(t, tab)
 

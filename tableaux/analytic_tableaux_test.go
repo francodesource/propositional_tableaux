@@ -9,8 +9,8 @@ import (
 	"testing/quick"
 )
 
-// TestBuildAnalyticTableaux checks that the assignments discovered by the analytic tableaux are the same of the semantic one
-func TestBuildAnalyticTableaux(t *testing.T) {
+// TestBuildAnalyticTableaux_SemanticCompare checks that the assignments discovered by the analytic tableaux are the same of the semantic one
+func TestBuildAnalyticTableaux_SemanticCompare(t *testing.T) {
 	f := func(f formula.Formula) bool {
 		semanticTab := BuildSemanticTableaux(f)
 		analyticTab := BuildAnalyticTableaux(f)
@@ -36,7 +36,7 @@ func TestBuildAnalyticTableaux(t *testing.T) {
 	}
 }
 
-// TestBuildAnalyticTableaux4 checks that the assignments obtained by an analytic tableaux, satisfy the formula.
+// TestBuildAnalyticTableaux2 checks that the assignments obtained by an analytic tableaux, satisfy the formula.
 func TestBuildAnalyticTableaux2(t *testing.T) {
 	f := func(f formula.Formula) bool {
 		tab := BuildAnalyticTableaux(f)

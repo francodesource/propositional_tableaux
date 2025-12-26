@@ -140,7 +140,7 @@ func main() {
 	case "semantic":
 		tab = tableaux.BuildSemanticTableaux(f)
 	case "analytic":
-		tab = tableaux.BuildBufferedTableaux(f)
+		tab = tableaux.BuildBufferTableaux(f)
 	}
 
 	var stringRep string
