@@ -121,3 +121,20 @@ Every flag can be omitted. If `in` is omitted, the user will be asked to insert 
 If `out` is omitted the tableau will be printed on `stdout`.
 
 The syntax used for formulas must follow the grammar defined in [Formula.g4](https://github.com/francodesource/propositional_tableaux/blob/master/formula/Formula.g4)
+
+## Installation
+The module can be imported in a project via:
+```bash
+go get github.com/francodesource/propositional_tableaux
+```
+### Command line interface
+The program can be simply installed via `go install`:
+```bash
+go install github.com/francodesource/propositional_tableaux/cmd/proptab@latest
+```
+
+or it can be built from source code by running:
+```bash
+go build .
+```
+in the project folder.
