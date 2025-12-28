@@ -49,8 +49,8 @@ mark: Open
 }
 }
 }
-This is the default print function of a tableu.
 ```
+This is the default print function of a tableau.
 And the output of the assignments:
 ```plaintext
 [map[q:false]]
